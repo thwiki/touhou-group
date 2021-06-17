@@ -52,7 +52,9 @@ function buildIndex({ homepage, sidebar, pages }) {
 
   for (const { index, title, md } of pages) {
     alias["/" + index] = "/" + md;
-    alias["/" + encodeURIComponent(title)] = "/" + md;
+    alias["/" + title] = "/" + md;
+    alias["/" + encodeURIComponent(title).toUpperCase()] = "/" + md;
+    alias["/" + encodeURIComponent(title).toLowerCase()] = "/" + md;
   }
 
   const script = `window.$docsify = JSON.parse(${JSON.stringify(
@@ -71,7 +73,7 @@ function buildIndex({ homepage, sidebar, pages }) {
       loadFooter: "_footer.md",
       executeScript: false,
     })
-  )});`;
+  )});(!!navigator.userAgent.match(/Trident/g) || !!navigator.userAgent.match(/MSIE/g)) && (window.$docsify.routerMode = 'hash');`;
 
   return nunjucks.render("templates/index.html.njk", {
     script,
