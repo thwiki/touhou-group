@@ -1,0 +1,14 @@
+<footer>
+
+---
+
+本网站内容取自 [THBWiki 的对应词条](https://thwiki.cc/%E4%B8%9C%E6%96%B9%E7%9B%B8%E5%85%B3QQ%E7%BE%A4%E7%BB%84%E5%88%97%E8%A1%A8) ，并自动生成。
+
+[隐私权政策](https://thwiki.cc/THBWiki:%E9%9A%90%E7%A7%81%E6%9D%83%E6%94%BF%E7%AD%96) |
+[关于 THBWiki](https://thwiki.cc/THBWiki:%E5%85%B3%E4%BA%8E) |
+[免责声明](https://thwiki.cc/THBWiki:%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E) |
+[捐款支持](https://thwiki.cc/THBWiki:%E6%8D%90%E6%AC%BE)
+
+[![由TBSGroup建立的专业性东方Project维基百科](https://thwiki.cc/banner/banner_b3.png)](https://thwiki.cc/)
+
+</footer>

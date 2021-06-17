@@ -1,0 +1,32 @@
+{
+  "name": "touhou-group",
+  "version": "1.0.0",
+  "description": "Touhou Group List",
+  "main": "index.js",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "docsify serve site"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thwiki/touhou-group.git"
+  },
+  "author": "arumi@thwiki.cc",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thwiki/touhou-group/issues"
+  },
+  "homepage": "https://github.com/thwiki/touhou-group#readme",
+  "dependencies": {
+    "del": "^6.0.0",
+    "dompurify": "^2.2.9",
+    "jsdom": "^16.6.0",
+    "make-dir": "^3.1.0",
+    "markdown-table": "^3.0.0",
+    "node-fetch": "^2.6.1",
+    "nunjucks": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^16.2.11"
+  }
+}

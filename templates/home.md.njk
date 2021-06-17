@@ -1,0 +1,10 @@
+{{ text | safe }}
+
+<div class="banners">
+{% for page in pages %}
+<a class="banner" href="/{{ page.title }}">
+	<div class="banner-name">{{ page.title }}</div>
+	<div class="banner-count">{{ page.count }} 个</div>
+</a>
+{% endfor %}
+</div>
