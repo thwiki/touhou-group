@@ -27,7 +27,8 @@ DOMPurify.addHook("uponSanitizeElement", function (node) {
   }
 });
 
-const SOURCE_URL = "https://thwiki.cc/index.php?title=%E4%B8%9C%E6%96%B9%E7%9B%B8%E5%85%B3QQ%E7%BE%A4%E7%BB%84%E5%88%97%E8%A1%A8&action=render";
+const SOURCE_URL =
+  "https://thwiki.cc/api.php?action=parse&format=json&page=%E4%B8%9C%E6%96%B9%E7%9B%B8%E5%85%B3QQ%E7%BE%A4%E7%BB%84%E5%88%97%E8%A1%A8&prop=text%7Crevid%7Climitreportdata";
 const SITE_ROOT = "site";
 const PAGES_ROOT = "pages";
 
@@ -47,7 +48,11 @@ function buildSidebar(options) {
   return nunjucks.render("templates/_sidebar.md.njk", options);
 }
 
-function buildIndex({ homepage, sidebar, pages }) {
+function buildFooter(options) {
+  return nunjucks.render("templates/_footer.md.njk", options);
+}
+
+function buildIndex({ homepage, sidebar, footer, pages }) {
   const alias = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
 
   for (const { index, title, md } of pages) {
@@ -60,7 +65,7 @@ function buildIndex({ homepage, sidebar, pages }) {
   const script = `window.$docsify = JSON.parse(${JSON.stringify(
     JSON.stringify({
       name: "东方相关QQ群组列表",
-      repo: "",
+      repo: "https://github.com/thwiki/touhou-group/",
       homepage,
       logo: "/_media/logo.png",
       themeColor: "#f2b040",
@@ -70,8 +75,7 @@ function buildIndex({ homepage, sidebar, pages }) {
       routerMode: "history",
       notFoundPage: true,
       loadSidebar: true,
-      loadFooter: true,
-      loadFooter: "_footer.md",
+      loadFooter: footer,
       executeScript: false,
     })
   )});`;
@@ -82,7 +86,14 @@ function buildIndex({ homepage, sidebar, pages }) {
 }
 
 (async () => {
-  const text = await (await fetch(SOURCE_URL)).text();
+  const json = await (await fetch(SOURCE_URL)).json();
+
+  const text = json?.parse?.text?.["*"];
+  if (text == null) throw new Error("parsed text not found");
+
+  const revid = json?.parse?.revid ?? 0;
+  const limitreportdata = json?.parse?.limitreportdata ?? [];
+
   const dom = new JSDOM(text, { contentType: "text/html" });
   const document = dom.window.document;
 
@@ -90,6 +101,7 @@ function buildIndex({ homepage, sidebar, pages }) {
   if (parserOutput == null) throw new Error(".mw-parser-output not found");
 
   await del(SITE_ROOT + "/_sidebar.*.md");
+  await del(SITE_ROOT + "/_footer.*.md");
   await del(SITE_ROOT + "/" + PAGES_ROOT);
   await makeDir(SITE_ROOT + "/" + PAGES_ROOT);
 
@@ -149,5 +161,15 @@ function buildIndex({ homepage, sidebar, pages }) {
   const sidebarMd = `_sidebar.${getHash(sidebar)}.md`;
   await fs.promises.writeFile(path.join(SITE_ROOT, sidebarMd), sidebar, { encoding: "utf8" });
 
-  await fs.promises.writeFile(path.join(SITE_ROOT, "index.html"), buildIndex({ homepage: homeMd, sidebar: sidebarMd, pages }), { encoding: "utf8" });
+  const timestamp = (limitreportdata.find((report) => report.name === "cachereport-timestamp")?.["0"] ?? "").replace(
+    /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+    "$1-$2-$3 $4:$5:$6"
+  );
+  const footer = buildFooter({ revid, timestamp });
+  const footerMd = `_footer.${getHash(footer)}.md`;
+  await fs.promises.writeFile(path.join(SITE_ROOT, footerMd), footer, { encoding: "utf8" });
+
+  await fs.promises.writeFile(path.join(SITE_ROOT, "index.html"), buildIndex({ homepage: homeMd, sidebar: sidebarMd, footer: footerMd, pages }), {
+    encoding: "utf8",
+  });
 })();

@@ -6,6 +6,7 @@
 /out-tsc
 /site/pages
 /site/_sidebar.*.md
+/site/_footer.*.md
 /site/index.html
 
 # dependencies
