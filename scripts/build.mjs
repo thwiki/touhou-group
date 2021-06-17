@@ -15,10 +15,12 @@ const DOMPurify = createDOMPurify(window);
 DOMPurify.addHook("uponSanitizeElement", function (node) {
   if (node?.nodeName === "A" && node?.hasAttribute("href")) {
     const img = node.querySelector("img");
+    let href = node.getAttribute("href");
+    if (href.startsWith("/")) href = "https://thwiki.cc" + href;
     if (img && img.hasAttribute("src")) {
-      node.textContent = `[![${img.getAttribute("title") ?? ""}](${img.getAttribute("src")})](${node.getAttribute("href")})`;
+      node.textContent = `[![${img.getAttribute("title") ?? ""}](${img.getAttribute("src")})](${href})`;
     } else {
-      node.textContent = `[${node.textContent}](${node.getAttribute("href")})`;
+      node.textContent = `[${node.textContent}](${href})`;
     }
   } else if (node?.nodeName === "SPAN" && node.classList.contains("inside")) {
     const s = window.document.createElement("s");
