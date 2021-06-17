@@ -48,7 +48,7 @@ function buildSidebar(options) {
 }
 
 function buildIndex({ homepage, sidebar, pages }) {
-  const alias = { ".*/_sidebar.md": "/" + sidebar };
+  const alias = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
 
   for (const { index, title, md } of pages) {
     alias["/" + index] = "/" + md;
@@ -68,6 +68,7 @@ function buildIndex({ homepage, sidebar, pages }) {
       subMaxLevel: 3,
       maxLevel: 2,
       routerMode: "history",
+      notFoundPage: true,
       loadSidebar: true,
       loadFooter: true,
       loadFooter: "_footer.md",
