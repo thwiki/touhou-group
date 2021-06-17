@@ -73,7 +73,7 @@ function buildIndex({ homepage, sidebar, pages }) {
       loadFooter: "_footer.md",
       executeScript: false,
     })
-  )});(!!navigator.userAgent.match(/Trident/g) || !!navigator.userAgent.match(/MSIE/g)) && (window.$docsify.routerMode = 'hash');`;
+  )});`;
 
   return nunjucks.render("templates/index.html.njk", {
     script,
