@@ -3,6 +3,7 @@ import createDOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { markdownTable } from "markdown-table";
 import nunjucks from "nunjucks";
+import { DateTime } from "luxon";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -54,7 +55,11 @@ function buildFooter(options) {
   return nunjucks.render("templates/_footer.md.njk", options);
 }
 
-function buildIndex({ homepage, sidebar, footer, pages }) {
+function buildError404(options) {
+  return nunjucks.render("templates/_404.md.njk", options);
+}
+
+function buildIndex({ homepage, sidebar, footer, error404, pages }) {
   const alias = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
 
   for (const { index, title, md } of pages) {
@@ -75,7 +80,7 @@ function buildIndex({ homepage, sidebar, footer, pages }) {
       subMaxLevel: 3,
       maxLevel: 2,
       routerMode: "history",
-      notFoundPage: true,
+      notFoundPage: error404,
       loadSidebar: true,
       loadFooter: footer,
       executeScript: false,
@@ -89,6 +94,7 @@ function buildIndex({ homepage, sidebar, footer, pages }) {
 
 (async () => {
   const json = await (await fetch(SOURCE_URL)).json();
+  const buildDate = DateTime.now();
 
   const text = json?.parse?.text?.["*"];
   if (text == null) throw new Error("parsed text not found");
@@ -104,6 +110,7 @@ function buildIndex({ homepage, sidebar, footer, pages }) {
 
   await del(SITE_ROOT + "/_sidebar.*.md");
   await del(SITE_ROOT + "/_footer.*.md");
+  await del(SITE_ROOT + "/_404.*.md");
   await del(SITE_ROOT + "/" + PAGES_ROOT);
   await makeDir(SITE_ROOT + "/" + PAGES_ROOT);
 
@@ -163,15 +170,43 @@ function buildIndex({ homepage, sidebar, footer, pages }) {
   const sidebarMd = `_sidebar.${getHash(sidebar)}.md`;
   await fs.promises.writeFile(path.join(SITE_ROOT, sidebarMd), sidebar, { encoding: "utf8" });
 
-  const timestamp = (limitreportdata.find((report) => report.name === "cachereport-timestamp")?.["0"] ?? "").replace(
-    /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
-    "$1-$2-$3 $4:$5:$6"
+  const editDate = DateTime.fromISO(
+    (limitreportdata.find((report) => report.name === "cachereport-timestamp")?.["0"] ?? "").replace(
+      /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+      "$1-$2-$3T$4:$5:$6"
+    )
   );
-  const footer = buildFooter({ revid, timestamp });
+
+  const footer = buildFooter({
+    revid,
+    editDate: editDate.setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL),
+    buildDate: buildDate.setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL),
+  });
   const footerMd = `_footer.${getHash(footer)}.md`;
   await fs.promises.writeFile(path.join(SITE_ROOT, footerMd), footer, { encoding: "utf8" });
 
-  await fs.promises.writeFile(path.join(SITE_ROOT, "index.html"), buildIndex({ homepage: homeMd, sidebar: sidebarMd, footer: footerMd, pages }), {
-    encoding: "utf8",
-  });
+  const error404 = buildError404({});
+  const error404Md = `_404.${getHash(error404)}.md`;
+  await fs.promises.writeFile(path.join(SITE_ROOT, error404Md), error404, { encoding: "utf8" });
+
+  await fs.promises.writeFile(
+    path.join(SITE_ROOT, "index.html"),
+    buildIndex({ homepage: homeMd, sidebar: sidebarMd, footer: footerMd, error404: error404Md, pages }),
+    {
+      encoding: "utf8",
+    }
+  );
+
+  await fs.promises.writeFile(
+    path.join(SITE_ROOT, "info.json"),
+    JSON.stringify({
+      build: buildDate.toMillis(),
+      edit: editDate.toMillis(),
+      revid,
+      pages: pages.map((page) => ({ index: page.index, title: page.title, count: page.count, md: page.md })),
+    }),
+    {
+      encoding: "utf8",
+    }
+  );
 })();

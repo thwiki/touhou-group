@@ -5,9 +5,9 @@
 /tmp
 /out-tsc
 /site/pages
-/site/_sidebar.*.md
-/site/_footer.*.md
+/site/*.*.md
 /site/index.html
+/site/info.json
 
 # dependencies
 /node_modules
