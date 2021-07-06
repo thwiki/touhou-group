@@ -84,6 +84,7 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }) {
       loadSidebar: true,
       loadFooter: footer,
       executeScript: false,
+      ga: "UA-131267722-6",
     })
   )});`;
 
