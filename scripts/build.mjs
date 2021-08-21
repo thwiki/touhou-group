@@ -178,10 +178,11 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }) {
     )
   );
 
+  const timeZone = "Asia/Shanghai";
   const footer = buildFooter({
     revid,
-    editDate: editDate.setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL),
-    buildDate: buildDate.setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL),
+    editDate: editDate.setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL, { timeZone }),
+    buildDate: buildDate.setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL, { timeZone }),
   });
   const footerMd = `_footer.${getHash(footer)}.md`;
   await fs.promises.writeFile(path.join(SITE_ROOT, footerMd), footer, { encoding: "utf8" });
