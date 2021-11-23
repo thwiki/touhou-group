@@ -9,14 +9,24 @@ import fs from "fs";
 import path from "path";
 import del from "del";
 import makeDir from "make-dir";
+import { Result } from "./types/mw";
+
+interface Page {
+  index: number;
+  title: string;
+  count: number;
+  content: string;
+  hash: string;
+  md: string;
+}
 
 const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
+const DOMPurify = createDOMPurify(window as any);
 
 DOMPurify.addHook("uponSanitizeElement", function (node) {
   if (node?.nodeName === "A" && node?.hasAttribute("href")) {
     const img = node.querySelector("img");
-    let href = node.getAttribute("href");
+    let href = node.getAttribute("href") ?? "";
     if (href.startsWith("/")) href = "https://thwiki.cc" + href;
     if (img && img.hasAttribute("src")) {
       node.textContent = `[![${img.getAttribute("title") ?? ""}](${img.getAttribute("src")})](${href})`;
@@ -35,32 +45,32 @@ const SOURCE_URL =
 const SITE_ROOT = "site";
 const PAGES_ROOT = "pages";
 
-function getHash(text) {
+function getHash(text: string) {
   return crypto.createHash("sha1").update(text).digest("hex").substr(0, 8);
 }
 
-function htmlToMarkdown(html) {
+function htmlToMarkdown(html: string) {
   return DOMPurify.sanitize(html, { ALLOWED_TAGS: ["b", "s", "i", "img", "br"] }).replace(/\s+/g, " ");
 }
 
-function buildHome(options) {
+function buildHome(options: { text: string; pages: Page[] }) {
   return nunjucks.render("templates/home.md.njk", options);
 }
 
-function buildSidebar(options) {
+function buildSidebar(options: { pages: Page[] }) {
   return nunjucks.render("templates/_sidebar.md.njk", options);
 }
 
-function buildFooter(options) {
+function buildFooter(options: { revid: number; title: string; editDate: string; buildDate: string }) {
   return nunjucks.render("templates/_footer.md.njk", options);
 }
 
-function buildError404(options) {
+function buildError404(options: {}) {
   return nunjucks.render("templates/_404.md.njk", options);
 }
 
-function buildIndex({ homepage, sidebar, footer, error404, pages }) {
-  const alias = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
+function buildIndex({ homepage, sidebar, footer, error404, pages }: { homepage: string; sidebar: string; footer: string; error404: string; pages: Page[] }) {
+  const alias: Record<string, string> = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
 
   for (const { index, title, md } of pages) {
     alias["/" + index] = "/" + md;
@@ -94,14 +104,17 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }) {
 }
 
 (async () => {
-  const json = await (await fetch(SOURCE_URL)).json();
+  const json = (await (await fetch(SOURCE_URL)).json()) as Result;
   const buildDate = DateTime.now();
 
-  const text = json?.parse?.text?.["*"];
+  if ("error" in json) throw new Error(json.error.info);
+
+  const text = json.parse.text?.["*"];
   if (text == null) throw new Error("parsed text not found");
 
-  const revid = json?.parse?.revid ?? 0;
-  const limitreportdata = json?.parse?.limitreportdata ?? [];
+  const title = json.parse.title;
+  const revid = json.parse.revid ?? 0;
+  const limitreportdata = json.parse?.limitreportdata ?? [];
 
   const dom = new JSDOM(text, { contentType: "text/html" });
   const document = dom.window.document;
@@ -143,7 +156,7 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }) {
 
   const contents = markdown.split(/\s*\n----------\n\s*/).filter((page) => page !== "");
 
-  const pages = contents.map((content, index) => {
+  const pages: Page[] = contents.map((content, index) => {
     const title = content.match(/^#\s*(.+)$/m)?.[1] ?? "";
     const count = (content.match(/^\|\s/gm) ?? []).length - (content.match(/^\|\s*---/gm) ?? []).length * 2;
     const hash = getHash(content);
@@ -172,14 +185,14 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }) {
   await fs.promises.writeFile(path.join(SITE_ROOT, sidebarMd), sidebar, { encoding: "utf8" });
 
   const editDate = DateTime.fromISO(
-    (limitreportdata.find((report) => report.name === "cachereport-timestamp")?.["0"] ?? "").replace(
-      /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
-      "$1-$2-$3T$4:$5:$6"
-    )
+    (limitreportdata.find((report) => report.name === "cachereport-timestamp")?.[0] ?? "")
+      .toString()
+      .replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/, "$1-$2-$3T$4:$5:$6")
   );
 
   const footer = buildFooter({
     revid,
+    title,
     editDate: editDate.setZone("Asia/Shanghai").setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL),
     buildDate: buildDate.setZone("Asia/Shanghai").setLocale("zh-Hans").toLocaleString(DateTime.DATETIME_FULL),
   });
@@ -204,6 +217,7 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }) {
       build: buildDate.toMillis(),
       edit: editDate.toMillis(),
       revid,
+      title,
       pages: pages.map((page) => ({ index: page.index, title: page.title, count: page.count, md: page.md })),
     }),
     {
