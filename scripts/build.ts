@@ -84,7 +84,7 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }: { homepage: 
       name: "东方相关QQ群组列表",
       repo: "https://github.com/thwiki/touhou-group/",
       homepage,
-      logo: "/_media/logo.png",
+      logo: "https://cdn.jsdelivr.net/gh/thwiki/touhou-group/site/_media/logo.png",
       themeColor: "#f2b040",
       alias,
       subMaxLevel: 3,
