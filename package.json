@@ -1,39 +1,43 @@
 {
-  "name": "touhou-group",
-  "version": "1.2.0",
-  "description": "Touhou Group List",
-  "type": "module",
-  "main": "dist/build.js",
-  "scripts": {
-    "build": "tsc && node dist/build.js",
-    "serve": "docsify serve site"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thwiki/touhou-group.git"
-  },
-  "author": "arumi@thwiki.cc",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/thwiki/touhou-group/issues"
-  },
-  "homepage": "https://github.com/thwiki/touhou-group#readme",
-  "dependencies": {
-    "del": "^6.0.0",
-    "dompurify": "^2.3.3",
-    "jsdom": "^16.7.0",
-    "luxon": "^1.28.0",
-    "make-dir": "^3.1.0",
-    "markdown-table": "^3.0.1",
-    "node-fetch": "^3.1.0",
-    "nunjucks": "^3.2.3"
-  },
-  "devDependencies": {
-    "@types/dompurify": "^2.3.1",
-    "@types/jsdom": "^16.2.13",
-    "@types/luxon": "^2.0.7",
-    "@types/node-fetch": "^3.0.3",
-    "@types/nunjucks": "^3.2.0",
-    "typescript": "^4.5.2"
-  }
+	"name": "touhou-group",
+	"version": "1.2.0",
+	"description": "Touhou Group List",
+	"type": "module",
+	"main": "dist/build.js",
+	"scripts": {
+		"build": "tsc && node dist/build.js && npm run freecdn",
+		"serve": "docsify serve site",
+		"freecdn": "npm run freecdn:find && npm run freecdn:make",
+		"freecdn:find": "freecdn find --filter \"site/**/*\" --with-urls \"site/urls.txt\" --save \"site/freecdn-manifest.txt\"",
+		"freecdn:make": "cd ./site && freecdn js --make"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thwiki/touhou-group.git"
+	},
+	"author": "arumi@thwiki.cc",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/thwiki/touhou-group/issues"
+	},
+	"homepage": "https://github.com/thwiki/touhou-group#readme",
+	"dependencies": {
+		"del": "^6.0.0",
+		"dompurify": "^2.3.3",
+		"jsdom": "^16.7.0",
+		"luxon": "^1.28.0",
+		"make-dir": "^3.1.0",
+		"markdown-table": "^3.0.1",
+		"node-fetch": "^3.1.0",
+		"nunjucks": "^3.2.3"
+	},
+	"devDependencies": {
+		"@types/dompurify": "^2.3.1",
+		"@types/jsdom": "^16.2.13",
+		"@types/luxon": "^2.0.7",
+		"@types/node-fetch": "^3.0.3",
+		"@types/nunjucks": "^3.2.0",
+		"freecdn": "^0.3.0",
+		"typescript": "^4.5.2"
+	}
 }

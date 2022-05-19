@@ -8,6 +8,8 @@
 /site/*.*.md
 /site/index.html
 /site/info.json
+/site/urls.txt
+/site/freecdn-*
 
 # dependencies
 /node_modules
