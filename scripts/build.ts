@@ -9,6 +9,7 @@ import fs from "fs";
 import path from "path";
 import del from "del";
 import makeDir from "make-dir";
+import less from "less";
 import { Result } from "./types/mw";
 
 interface Page {
@@ -69,7 +70,21 @@ function buildError404(options: {}) {
 	return nunjucks.render("templates/_404.md.njk", options);
 }
 
-function buildIndex({ homepage, sidebar, footer, error404, pages }: { homepage: string; sidebar: string; footer: string; error404: string; pages: Page[] }) {
+function buildIndex({
+	homepage,
+	sidebar,
+	footer,
+	error404,
+	pages,
+	style,
+}: {
+	homepage: string;
+	sidebar: string;
+	footer: string;
+	error404: string;
+	pages: Page[];
+	style: string;
+}) {
 	const alias: Record<string, string> = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
 
 	for (const { index, title, md } of pages) {
@@ -100,6 +115,7 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }: { homepage: 
 
 	return nunjucks.render("templates/index.html.njk", {
 		script,
+		style,
 	});
 }
 
@@ -204,7 +220,9 @@ function buildIndex({ homepage, sidebar, footer, error404, pages }: { homepage: 
 	const error404Md = `_404.${getHash(error404Html)}.md`;
 	await fs.promises.writeFile(path.join(SITE_ROOT, error404Md), error404Html, { encoding: "utf8" });
 
-	const indexHtml = buildIndex({ homepage: homeMd, sidebar: sidebarMd, footer: footerMd, error404: error404Md, pages });
+	const style = (await less.render(nunjucks.render("templates/styles.less", {}))).css;
+
+	const indexHtml = buildIndex({ homepage: homeMd, sidebar: sidebarMd, footer: footerMd, error404: error404Md, pages, style });
 	await fs.promises.writeFile(path.join(SITE_ROOT, "index.html"), indexHtml, {
 		encoding: "utf8",
 	});
