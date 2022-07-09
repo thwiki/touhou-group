@@ -27,6 +27,7 @@
 		"del": "^6.0.0",
 		"docsify": "^4.12.2",
 		"dompurify": "^2.3.3",
+		"download": "^8.0.0",
 		"jsdom": "^16.7.0",
 		"luxon": "^1.28.0",
 		"make-dir": "^3.1.0",
@@ -38,10 +39,10 @@
 	"devDependencies": {
 		"@types/csso": "^5.0.0",
 		"@types/dompurify": "^2.3.1",
+		"@types/download": "^8.0.1",
 		"@types/jsdom": "^16.2.13",
 		"@types/less": "^3.0.3",
 		"@types/luxon": "^2.0.7",
-		"@types/node-fetch": "^3.0.3",
 		"@types/nunjucks": "^3.2.0",
 		"less": "^4.1.2",
 		"typescript": "^4.5.2"

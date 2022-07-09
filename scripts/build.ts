@@ -10,6 +10,7 @@ import path from "path";
 import del from "del";
 import makeDir from "make-dir";
 import cpy from "cpy";
+import download from "download";
 import less from "less";
 import { minify } from "csso";
 import { Result } from "./types/mw";
@@ -23,16 +24,31 @@ interface Page {
 	md: string;
 }
 
+interface ImageUrl {
+	from: string;
+	to: string;
+}
+
 const window = new JSDOM("").window;
 const DOMPurify = createDOMPurify(window as any);
 
-DOMPurify.addHook("uponSanitizeElement", function (node) {
+DOMPurify.addHook("uponSanitizeElement", function (node, _, config: createDOMPurify.Config & { IMAGE_URLS: ImageUrl[] }) {
 	if (node?.nodeName === "A" && node?.hasAttribute("href")) {
 		const img = node.querySelector("img");
 		let href = node.getAttribute("href") ?? "";
 		if (href.startsWith("/")) href = "https://thwiki.cc" + href;
-		if (img && img.hasAttribute("src")) {
-			node.textContent = `[![${img.getAttribute("title") ?? ""}](${img.getAttribute("src")})](${href})`;
+
+		if (img?.hasAttribute("src")) {
+			const imgSrc = img.getAttribute("src") ?? "";
+			const extension = path.extname(imgSrc);
+
+			if (imgSrc.startsWith(IMAGE_HOST) && /^\.(jpe?g|png|gif|webp|svg)$/.test(extension)) {
+				const localSrc = "/" + IMAGES_ROOT + "/" + crypto.createHash("sha1").update(imgSrc).digest("base64url") + extension;
+				node.textContent = `[![${img.getAttribute("title") ?? ""}](${localSrc})](${href})`;
+				config.IMAGE_URLS.push({ from: imgSrc, to: localSrc });
+			} else {
+				node.textContent = `[![](/logo.png)](${href})`;
+			}
 		} else {
 			node.textContent = `[${node.textContent}](${href})`;
 		}
@@ -45,18 +61,25 @@ DOMPurify.addHook("uponSanitizeElement", function (node) {
 
 const SOURCE_URL =
 	"https://thwiki.cc/api.php?action=parse&format=json&page=%E4%B8%9C%E6%96%B9%E7%9B%B8%E5%85%B3QQ%E7%BE%A4%E7%BB%84%E5%88%97%E8%A1%A8&prop=text%7Crevid%7Climitreportdata";
+const IMAGE_HOST = "https://upload.thwiki.cc/";
 const SITE_ROOT = "public";
 const SOURCE_ROOT = "src";
 const STATIC_ROOT = SOURCE_ROOT + "/static";
 const PAGES_ROOT = "pages";
+const IMAGES_ROOT = "images";
 const LIB_ROOT = "lib";
 
+const IMAGE_URLS: ImageUrl[] = [];
+
 function getHash(text: string) {
-	return crypto.createHash("sha1").update(text).digest("hex").substr(0, 8);
+	return crypto.createHash("sha1").update(text).digest("hex").substring(0, 8);
 }
 
 function htmlToMarkdown(html: string) {
-	return DOMPurify.sanitize(html, { ALLOWED_TAGS: ["b", "s", "i", "img", "br"] }).replace(/\s+/g, " ");
+	const config = { ALLOWED_TAGS: ["b", "s", "i", "img", "br"], IMAGE_URLS: [] };
+	const text = DOMPurify.sanitize(html, config).replace(/\s+/g, " ");
+	IMAGE_URLS.push(...config.IMAGE_URLS);
+	return text;
 }
 
 function buildHome(options: { text: string; pages: Page[] }) {
@@ -149,6 +172,7 @@ function buildIndex({
 	await cpy(STATIC_ROOT + "/**", SITE_ROOT);
 	await makeDir(SITE_ROOT + "/" + PAGES_ROOT);
 	await makeDir(SITE_ROOT + "/" + LIB_ROOT);
+	await makeDir(SITE_ROOT + "/" + IMAGES_ROOT);
 
 	const copyLibs = [
 		"node_modules/docsify/lib/themes/vue.css",
@@ -177,7 +201,7 @@ function buildIndex({
 			});
 			markdown += "\n" + markdownTable(table) + "\n";
 		} else if (/^h\d$/.test(tagName)) {
-			const level = parseInt(tagName.substr(1), 10) - 1;
+			const level = parseInt(tagName.substring(1), 10) - 1;
 			if (level === 1) {
 				markdown += `\n----------\n`;
 			}
@@ -240,6 +264,10 @@ function buildIndex({
 	await fs.promises.writeFile(path.join(SITE_ROOT, "index.html"), indexHtml, {
 		encoding: "utf8",
 	});
+
+	await Promise.all(
+		IMAGE_URLS.map(async ({ from: imageFrom, to: imageTo }) => await fs.promises.writeFile(path.join(SITE_ROOT, imageTo), await download(imageFrom)))
+	);
 
 	await fs.promises.writeFile(
 		path.join(SITE_ROOT, "info.json"),
