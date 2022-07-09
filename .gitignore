@@ -4,12 +4,7 @@
 /dist
 /tmp
 /out-tsc
-/site/pages
-/site/*.*.md
-/site/index.html
-/site/info.json
-/site/urls.txt
-/site/freecdn-*
+/public
 
 # dependencies
 /node_modules
@@ -44,3 +39,4 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+.vercel
