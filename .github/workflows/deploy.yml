@@ -35,7 +35,7 @@ jobs:
         env:
             SSH_PRIVATE_KEY: ${{ secrets.SERVER_GITHUB_SSH_KEY }}
             ARGS: "-rltgoDzvO --delete"
-            SOURCE: "site/"
+            SOURCE: "public/"
             REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
             REMOTE_USER: ${{ secrets.REMOTE_USER }}
             TARGET: ${{ secrets.REMOTE_TARGET }}

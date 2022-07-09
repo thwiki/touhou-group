@@ -9,7 +9,9 @@ import fs from "fs";
 import path from "path";
 import del from "del";
 import makeDir from "make-dir";
+import cpy from "cpy";
 import less from "less";
+import { minify } from "csso";
 import { Result } from "./types/mw";
 
 interface Page {
@@ -43,8 +45,11 @@ DOMPurify.addHook("uponSanitizeElement", function (node) {
 
 const SOURCE_URL =
 	"https://thwiki.cc/api.php?action=parse&format=json&page=%E4%B8%9C%E6%96%B9%E7%9B%B8%E5%85%B3QQ%E7%BE%A4%E7%BB%84%E5%88%97%E8%A1%A8&prop=text%7Crevid%7Climitreportdata";
-const SITE_ROOT = "site";
+const SITE_ROOT = "public";
+const SOURCE_ROOT = "src";
+const STATIC_ROOT = SOURCE_ROOT + "/static";
 const PAGES_ROOT = "pages";
+const LIB_ROOT = "lib";
 
 function getHash(text: string) {
 	return crypto.createHash("sha1").update(text).digest("hex").substr(0, 8);
@@ -55,19 +60,19 @@ function htmlToMarkdown(html: string) {
 }
 
 function buildHome(options: { text: string; pages: Page[] }) {
-	return nunjucks.render("templates/home.md.njk", options);
+	return nunjucks.render(SOURCE_ROOT + "/home.md.njk", options);
 }
 
 function buildSidebar(options: { pages: Page[] }) {
-	return nunjucks.render("templates/_sidebar.md.njk", options);
+	return nunjucks.render(SOURCE_ROOT + "/_sidebar.md.njk", options);
 }
 
 function buildFooter(options: { revid: number; title: string; editDate: string; buildDate: string }) {
-	return nunjucks.render("templates/_footer.md.njk", options);
+	return nunjucks.render(SOURCE_ROOT + "/_footer.md.njk", options);
 }
 
 function buildError404(options: {}) {
-	return nunjucks.render("templates/_404.md.njk", options);
+	return nunjucks.render(SOURCE_ROOT + "/_404.md.njk", options);
 }
 
 function buildIndex({
@@ -99,7 +104,7 @@ function buildIndex({
 			name: "东方相关QQ群组列表",
 			repo: "https://github.com/thwiki/touhou-group/",
 			homepage,
-			logo: "/_media/logo.png",
+			logo: "/logo.png",
 			themeColor: "#f2b040",
 			alias,
 			subMaxLevel: 3,
@@ -113,7 +118,7 @@ function buildIndex({
 		})
 	)});`;
 
-	return nunjucks.render("templates/index.html.njk", {
+	return nunjucks.render(SOURCE_ROOT + "/index.html.njk", {
 		script,
 		style,
 	});
@@ -138,12 +143,21 @@ function buildIndex({
 	const parserOutput = document.querySelector(".mw-parser-output");
 	if (parserOutput == null) throw new Error(".mw-parser-output not found");
 
-	await del(SITE_ROOT + "/_sidebar.*.md");
-	await del(SITE_ROOT + "/_footer.*.md");
-	await del(SITE_ROOT + "/_404.*.md");
-	await del(SITE_ROOT + "/" + PAGES_ROOT);
-	await del(SITE_ROOT + "/freecdn-internal");
+	await del(SITE_ROOT);
+	await makeDir(SITE_ROOT);
+
+	await cpy(STATIC_ROOT + "/**", SITE_ROOT);
 	await makeDir(SITE_ROOT + "/" + PAGES_ROOT);
+	await makeDir(SITE_ROOT + "/" + LIB_ROOT);
+
+	const copyLibs = [
+		"node_modules/docsify/lib/themes/vue.css",
+		"node_modules/docsify/lib/docsify.min.js",
+		"node_modules/@alertbox/docsify-footer/src/docsify-footer.js",
+		"node_modules/docsify/lib/plugins/ga.min.js",
+	];
+
+	await cpy(copyLibs, SITE_ROOT + "/" + LIB_ROOT, { flat: true });
 
 	let markdown = "";
 	markdown += "# 东方相关 QQ 群组列表\n";
@@ -174,9 +188,9 @@ function buildIndex({
 	const contents = markdown.split(/\s*\n----------\n\s*/).filter((page) => page !== "");
 
 	const pages: Page[] = contents.map((content, index) => {
-		const title = content.match(/^#\s*(.+)$/m)?.[1] ?? "";
-		const count = (content.match(/^\|\s/gm) ?? []).length - (content.match(/^\|\s*---/gm) ?? []).length * 2;
-		const hash = getHash(content);
+		const title: string = content.match(/^#\s*(.+)$/m)?.[1] ?? "";
+		const count: number = (content.match(/^\|\s/gm) ?? []).length - (content.match(/^\|\s*---/gm) ?? []).length * 2;
+		const hash: string = getHash(content);
 
 		return {
 			index: index,
@@ -220,15 +234,10 @@ function buildIndex({
 	const error404Md = `_404.${getHash(error404Html)}.md`;
 	await fs.promises.writeFile(path.join(SITE_ROOT, error404Md), error404Html, { encoding: "utf8" });
 
-	const style = (await less.render(nunjucks.render("templates/styles.less", {}))).css;
+	const style = minify((await less.render(nunjucks.render(SOURCE_ROOT + "/styles.less", {}))).css).css;
 
 	const indexHtml = buildIndex({ homepage: homeMd, sidebar: sidebarMd, footer: footerMd, error404: error404Md, pages, style });
 	await fs.promises.writeFile(path.join(SITE_ROOT, "index.html"), indexHtml, {
-		encoding: "utf8",
-	});
-
-	const urls = Array.from(indexHtml.matchAll(/(?<=(?:href|src)=['"])https?:\/\/.+(?=['"])/g)).map((match) => match[0]);
-	await fs.promises.writeFile(path.join(SITE_ROOT, "urls.txt"), urls.join("\n"), {
 		encoding: "utf8",
 	});
 

@@ -5,11 +5,10 @@
 	"type": "module",
 	"main": "dist/build.js",
 	"scripts": {
-		"build": "tsc && node dist/build.js && npm run freecdn",
-		"serve": "docsify serve site",
-		"freecdn": "npm run freecdn:find && npm run freecdn:make",
-		"freecdn:find": "freecdn find --filter \"site/**/*\" --with-urls \"site/urls.txt\" --save \"site/freecdn-manifest.txt\"",
-		"freecdn:make": "cd ./site && freecdn js --make"
+		"setup": "npx vercel login && npx vercel link",
+		"start": "npx vercel dev",
+		"deploy": "npx vercel deploy --prod",
+		"build": "tsc && node dist/build.js"
 	},
 	"repository": {
 		"type": "git",
@@ -22,23 +21,28 @@
 	},
 	"homepage": "https://github.com/thwiki/touhou-group#readme",
 	"dependencies": {
+		"@alertbox/docsify-footer": "^1.0.0-0",
+		"cpy": "^9.0.1",
+		"csso": "^5.0.3",
 		"del": "^6.0.0",
+		"docsify": "^4.12.2",
 		"dompurify": "^2.3.3",
 		"jsdom": "^16.7.0",
 		"luxon": "^1.28.0",
 		"make-dir": "^3.1.0",
 		"markdown-table": "^3.0.1",
 		"node-fetch": "^3.1.0",
-		"nunjucks": "^3.2.3"
+		"nunjucks": "^3.2.3",
+		"vercel": "^27.0.0"
 	},
 	"devDependencies": {
+		"@types/csso": "^5.0.0",
 		"@types/dompurify": "^2.3.1",
 		"@types/jsdom": "^16.2.13",
 		"@types/less": "^3.0.3",
 		"@types/luxon": "^2.0.7",
 		"@types/node-fetch": "^3.0.3",
 		"@types/nunjucks": "^3.2.0",
-		"freecdn": "^0.3.0",
 		"less": "^4.1.2",
 		"typescript": "^4.5.2"
 	}
