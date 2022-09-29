@@ -19,4 +19,4 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Deploy to Vercel
-        run: curl -X POST {{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
