@@ -1,0 +1,21 @@
+<svg class="map" xmlns="http://www.w3.org/2000/svg" version='1.1' style='fill: currentColor; user-select: none;' width='540' height='540' viewBox='0 0 540 540'>
+	<style>
+.map a{color:inherit;}
+.map a>path{transition:125ms filter;}
+.map a:hover>path{filter:saturate(3) brightness(.8);}
+.map text{font-size:14px;text-anchor:middle;}
+.map .count{font-size:18px;font-weight:bold;}
+.map .disabled{opacity:.5;pointer-events:none;}
+	</style>
+	<g>
+		{% for location in locations %}
+		<g class="{% if location.count === 0 %}disabled{% endif %}" transform="translate({{ (location.x - 1) * 60 - (location.y % 2) * 30 | round }}, {{ (location.y - 1) * 52.9 | round }})">
+			<a href="/{{ title | urlencode }}?id={{ location.id | urlencode | lower }}">
+				<path d="M0 0l-28 16.86v31l28 15.86 28-15.86v-31Z" fill="{{ location.color }}" />
+				<text class="count" x="0" y="29">{{ location.count }}</text>
+				<text x="0" y="47">{{ location.name }}</text>
+			</a>
+		</g>
+		{% endfor %}
+	</g>
+</svg>

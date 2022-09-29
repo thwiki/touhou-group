@@ -29,6 +29,28 @@ interface ImageUrl {
 	to: string;
 }
 
+interface Model {
+	title: string;
+	prefix?: string;
+	suffix?: string;
+	count: number;
+	tables: {
+		title: string;
+		level: number;
+		table: string[][];
+		count: number;
+	}[];
+}
+
+interface Location {
+	id: string;
+	name: string;
+	x: number;
+	y: number;
+	color: string;
+	count: number;
+}
+
 const window = new JSDOM("").window;
 const DOMPurify = createDOMPurify(window as any);
 
@@ -47,7 +69,7 @@ DOMPurify.addHook("uponSanitizeElement", function (node, _, config: createDOMPur
 				node.textContent = `[![${img.getAttribute("title") ?? ""}](${localSrc})](${href})`;
 				config.IMAGE_URLS.push({ from: imgSrc, to: localSrc });
 			} else {
-				node.textContent = `[![](/logo.png)](${href})`;
+				node.textContent = `[${node.textContent}](${href})`;
 			}
 		} else {
 			node.textContent = `[${node.textContent}](${href})`;
@@ -90,6 +112,10 @@ function buildSidebar(options: { pages: Page[] }) {
 	return nunjucks.render(SOURCE_ROOT + "/_sidebar.md.njk", options);
 }
 
+function buildMap(options: { title: string; locations: Location[] }) {
+	return nunjucks.render(SOURCE_ROOT + "/map.svg.njk", options);
+}
+
 function buildFooter(options: { revid: number; title: string; editDate: string; buildDate: string }) {
 	return nunjucks.render(SOURCE_ROOT + "/_footer.md.njk", options);
 }
@@ -115,8 +141,7 @@ function buildIndex({
 }) {
 	const alias: Record<string, string> = { "/_sidebar.md": "/" + sidebar, "/.*/_sidebar.md": "/" + sidebar };
 
-	for (const { index, title, md } of pages) {
-		alias["/" + index] = "/" + md;
+	for (const { title, md } of pages) {
 		alias["/" + title] = "/" + md;
 		alias["/" + encodeURIComponent(title).toUpperCase()] = "/" + md;
 		alias["/" + encodeURIComponent(title).toLowerCase()] = "/" + md;
@@ -138,6 +163,9 @@ function buildIndex({
 			loadFooter: footer,
 			executeScript: false,
 			ga: "UA-131267722-6",
+			scrollToTop: {
+				text: "顶部",
+			},
 		})
 	)});`;
 
@@ -149,6 +177,8 @@ function buildIndex({
 
 (async () => {
 	const json = (await (await fetch(SOURCE_URL)).json()) as Result;
+	const locations = JSON.parse(await fs.promises.readFile(SOURCE_ROOT + "/locations.json", { encoding: "utf-8" })) as Location[];
+
 	const buildDate = DateTime.now();
 
 	if ("error" in json) throw new Error(json.error.info);
@@ -177,49 +207,83 @@ function buildIndex({
 	const copyLibs = [
 		"node_modules/docsify/lib/themes/vue.css",
 		"node_modules/docsify/lib/docsify.min.js",
+		"node_modules/docsify-scroll-to-top/dist/docsify-scroll-to-top.min.js",
 		"node_modules/@alertbox/docsify-footer/src/docsify-footer.js",
 		"node_modules/docsify/lib/plugins/ga.min.js",
 	];
 
 	await cpy(copyLibs, SITE_ROOT + "/" + LIB_ROOT, { flat: true });
+	await fs.promises.writeFile(
+		SITE_ROOT + "/" + LIB_ROOT + "/docsify.min.js",
+		(await fs.promises.readFile(SITE_ROOT + "/" + LIB_ROOT + "/docsify.min.js", { encoding: "utf-8" }))
+			.replace(/("A"===[\S\.]+?\.tagName)/g, "$1.toUpperCase()")
+			.replace(/\b(t.href)/, "$1.toString()") + ";SVGAnimatedString.prototype.toString=function(){return this.baseVal;};",
+		{ encoding: "utf-8" }
+	);
 
-	let markdown = "";
-	markdown += "# 东方相关 QQ 群组列表\n";
+	const models: Model[] = [];
+	let model: Model = { title: "东方相关 QQ 群组列表", tables: [], count: 0 };
+	models.push(model);
 
 	for (const childNode of parserOutput.children) {
 		const tagName = childNode.tagName.toLowerCase();
 		if (tagName === "ul") {
-			markdown +=
+			model.prefix =
+				(model.prefix ?? "") +
 				"\n" +
 				Array.from(childNode.querySelectorAll("li"))
 					.map((item) => `-  ${htmlToMarkdown(item.innerHTML)}\n`)
 					.join("") +
 				"\n";
 		} else if (tagName === "table") {
-			const table = Array.from(childNode.querySelectorAll("tr")).map((row) => {
-				return Array.from(row.querySelectorAll("td,th")).map((cell) => htmlToMarkdown(cell.innerHTML));
-			});
-			markdown += "\n" + markdownTable(table) + "\n";
+			const table = model.tables[model.tables.length - 1];
+			table.table = Array.from(childNode.querySelectorAll("tr")).map((row) =>
+				Array.from(row.querySelectorAll("td,th")).map((cell) => htmlToMarkdown(cell.innerHTML))
+			);
+			table.count = table.table.length - 1;
+			model.count += table.count;
 		} else if (/^h\d$/.test(tagName)) {
 			const level = parseInt(tagName.substring(1), 10) - 1;
+			const title = (childNode.querySelector(".mw-headline")?.textContent ?? "").trim();
+
 			if (level === 1) {
-				markdown += `\n----------\n`;
+				model = { title, tables: [], count: 0 };
+				models.push(model);
+			} else {
+				model.tables.push({ title, level, table: [], count: 0 });
 			}
-			markdown += `\n${"#".repeat(level)} ${childNode.querySelector(".mw-headline")?.textContent ?? ""}\n`;
 		}
 	}
 
-	const contents = markdown.split(/\s*\n----------\n\s*/).filter((page) => page !== "");
+	const pages: Page[] = models.map((model, index) => {
+		let content = `\n# ${model.title}\n`;
 
-	const pages: Page[] = contents.map((content, index) => {
-		const title: string = content.match(/^#\s*(.+)$/m)?.[1] ?? "";
-		const count: number = (content.match(/^\|\s/gm) ?? []).length - (content.match(/^\|\s*---/gm) ?? []).length * 2;
+		if (model.prefix) content += model.prefix;
+
+		const countedLocations = locations.map((location) => ({ ...location, count: model.tables.find((table) => table.title === location.id)?.count ?? 0 }));
+		if (countedLocations.some((location) => location.count > 0)) {
+			content +=
+				"\n\n\n" +
+				buildMap({
+					title: model.title,
+					locations: countedLocations,
+				}) +
+				"\n\n\n";
+		}
+
+		for (const table of model.tables) {
+			content += `\n${"#".repeat(table.level)} ${table.title}\n`;
+			if (table.table.length > 0) content += "\n" + markdownTable(table.table) + "\n";
+		}
+
+		if (model.suffix) content += model.suffix;
+
 		const hash: string = getHash(content);
 
 		return {
 			index: index,
-			title,
-			count,
+			title: model.title,
+			count: model.count,
 			content,
 			hash,
 			md: `${PAGES_ROOT}/${index}.${hash}.md`,
