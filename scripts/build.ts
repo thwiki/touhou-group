@@ -162,7 +162,7 @@ function buildIndex({
 			loadSidebar: true,
 			loadFooter: footer,
 			executeScript: false,
-			ga: "UA-131267722-6",
+			ga: "G-1JJZWKFJC4",
 			scrollToTop: {
 				text: "顶部",
 			},
@@ -209,7 +209,7 @@ function buildIndex({
 		"node_modules/docsify/lib/docsify.min.js",
 		"node_modules/docsify-scroll-to-top/dist/docsify-scroll-to-top.min.js",
 		"node_modules/@alertbox/docsify-footer/src/docsify-footer.js",
-		"node_modules/docsify/lib/plugins/ga.min.js",
+		"node_modules/docsify-plugin-ga/lib/main.js",
 	];
 
 	await cpy(copyLibs, SITE_ROOT + "/" + LIB_ROOT, { flat: true });

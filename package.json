@@ -26,6 +26,7 @@
 		"csso": "^5.0.3",
 		"del": "^6.0.0",
 		"docsify": "^4.12.2",
+		"docsify-plugin-ga": "^1.0.1",
 		"docsify-scroll-to-top": "^1.0.2",
 		"dompurify": "^2.3.3",
 		"download": "^8.0.0",
