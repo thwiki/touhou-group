@@ -10,7 +10,7 @@
 	<g>
 		{% for location in locations %}
 		<g class="{% if location.count === 0 %}disabled{% endif %}" transform="translate({{ (location.x - 1) * 60 - (location.y % 2) * 30 | round }}, {{ (location.y - 1) * 52.9 | round }})">
-			<a href="/{{ title | urlencode }}?id={{ location.id | urlencode | lower }}">
+			<a href="/{{ title | urlencode }}?id={{ location.id | urlencode | lower }}" data-id="{{ location.id }}" class="anchor">
 				<path d="M0 0l-28 16.86v31l28 15.86 28-15.86v-31Z" fill="{{ location.color }}" />
 				<text class="count" x="0" y="29">{{ location.count }}</text>
 				<text x="0" y="47">{{ location.name }}</text>

@@ -217,7 +217,7 @@ function buildIndex({
 		SITE_ROOT + "/" + LIB_ROOT + "/docsify.min.js",
 		(await fs.promises.readFile(SITE_ROOT + "/" + LIB_ROOT + "/docsify.min.js", { encoding: "utf-8" }))
 			.replace(/("A"===[\S\.]+?\.tagName)/g, "$1.toUpperCase()")
-			.replace(/\b(t.href)/, "$1.toString()") + ";SVGAnimatedString.prototype.toString=function(){return this.baseVal;};",
+			.replace(/\b(n\.href)/g, "$1.toString()") + ";SVGAnimatedString.prototype.toString=function(){return this.baseVal;};",
 		{ encoding: "utf-8" }
 	);
 
