@@ -1,6 +1,6 @@
 {
 	"name": "touhou-group",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "Touhou Group List",
 	"type": "module",
 	"main": "dist/build.js",

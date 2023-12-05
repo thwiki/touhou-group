@@ -19,9 +19,11 @@ interface Page {
 	index: number;
 	title: string;
 	count: number;
+	tables: Model["tables"];
 	content: string;
 	hash: string;
 	md: string;
+	json: string;
 }
 
 interface ImageUrl {
@@ -88,6 +90,7 @@ const SITE_ROOT = "public";
 const SOURCE_ROOT = "src";
 const STATIC_ROOT = SOURCE_ROOT + "/static";
 const PAGES_ROOT = "pages";
+const DATA_ROOT = "data";
 const IMAGES_ROOT = "images";
 const LIB_ROOT = "lib";
 
@@ -98,7 +101,7 @@ function getHash(text: string) {
 }
 
 function htmlToMarkdown(html: string) {
-	const config = { ALLOWED_TAGS: ["b", "s", "i", "img", "br"], IMAGE_URLS: [] };
+	const config = { ALLOWED_TAGS: ["img"], IMAGE_URLS: [] };
 	const text = DOMPurify.sanitize(html, config).replace(/\s+/g, " ");
 	IMAGE_URLS.push(...config.IMAGE_URLS);
 	return text;
@@ -201,6 +204,7 @@ function buildIndex({
 
 	await cpy(STATIC_ROOT + "/**", SITE_ROOT);
 	await makeDir(SITE_ROOT + "/" + PAGES_ROOT);
+	await makeDir(SITE_ROOT + "/" + DATA_ROOT);
 	await makeDir(SITE_ROOT + "/" + LIB_ROOT);
 	await makeDir(SITE_ROOT + "/" + IMAGES_ROOT);
 
@@ -284,9 +288,11 @@ function buildIndex({
 			index: index,
 			title: model.title,
 			count: model.count,
+			tables: model.tables,
 			content,
 			hash,
 			md: `${PAGES_ROOT}/${index}.${hash}.md`,
+			json: `${DATA_ROOT}/${index}.json`,
 		};
 	});
 	const pagesWithoutHome = pages.slice(1);
@@ -297,6 +303,7 @@ function buildIndex({
 	await fs.promises.writeFile(path.join(SITE_ROOT, homeMd), homeHtml, { encoding: "utf8" });
 	for (const page of pagesWithoutHome) {
 		await fs.promises.writeFile(path.join(SITE_ROOT, page.md), page.content, { encoding: "utf8" });
+		await fs.promises.writeFile(path.join(SITE_ROOT, page.json), JSON.stringify(page.tables), { encoding: "utf8" });
 	}
 
 	const sidebarHtml = buildSidebar({ pages: pagesWithoutHome });
@@ -340,7 +347,8 @@ function buildIndex({
 			edit: editDate.toMillis(),
 			revid,
 			title,
-			pages: pages.map((page) => ({ index: page.index, title: page.title, count: page.count, md: page.md })),
+			pages: pages.map((page) => ({ index: page.index, title: page.title, count: page.count, md: page.md, json: page.json })),
+			images: IMAGE_URLS,
 		}),
 		{
 			encoding: "utf8",
