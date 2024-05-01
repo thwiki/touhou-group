@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import H1 from '../components/H1.astro';
+import UL from '../components/UL.astro';
+
+export const listEntries = (await getCollection('lists')).sort((a, b) => a.data.id - b.data.id);
+---
+
+<BaseLayout slug="" headings={[]}>
+	<H1 id="_top">东方相关 QQ 群组列表</H1>
+
+	<UL>
+		<li>
+			专属网站 <a
+				class="font-medium text-amber-500 underline"
+				href={Astro.site}
+				target="_blank"
+				rel="noopener">{Astro.site?.host}</a
+			>
+		</li>
+		<li>本页面收录并整理东方相关的QQ群组</li>
+		<li>按照 性质 → 所属 的方式进行分类</li>
+		<li>仅收录公开或半公开（或有条件公开）性质的群组。请勿记录私密群、工作群、个人群。</li>
+		<li>
+			由<a
+				class="font-medium text-amber-500 underline"
+				href="https://weibo.com/u/6659143656"
+				target="_blank"
+				rel="noopener">全国地方东方调查组</a
+			>协力编辑
+		</li>
+	</UL>
+
+	<div class="mt-4 max-w-xl space-y-4">
+		{
+			listEntries.map((entry) => (
+				<Banner slug={entry.data.title} count={entry.data.count}>
+					{entry.data.title}
+				</Banner>
+			))
+		}
+	</div>
+</BaseLayout>

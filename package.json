@@ -1,14 +1,15 @@
 {
 	"name": "touhou-group",
-	"version": "1.5.0",
-	"description": "Touhou Group List",
 	"type": "module",
-	"main": "dist/build.js",
+	"version": "2.0.0",
+	"description": "Touhou Group List",
 	"scripts": {
-		"setup": "npx vercel login && npx vercel link",
-		"start": "npx vercel dev",
-		"deploy": "npx vercel deploy --prod",
-		"build": "tsc && node dist/build.js"
+		"format": "prettier --write .",
+		"dev": "astro dev --host 0.0.0.0",
+		"start": "astro dev",
+		"build": "astro check && astro build",
+		"preview": "astro preview",
+		"astro": "astro"
 	},
 	"repository": {
 		"type": "git",
@@ -19,34 +20,22 @@
 	"bugs": {
 		"url": "https://github.com/thwiki/touhou-group/issues"
 	},
-	"homepage": "https://github.com/thwiki/touhou-group#readme",
+	"homepage": "https://github.com/thwiki/touhou-group",
 	"dependencies": {
-		"@alertbox/docsify-footer": "^1.0.0-0",
-		"cpy": "^9.0.1",
-		"csso": "^5.0.3",
-		"del": "^6.0.0",
-		"docsify": "^4.12.2",
-		"docsify-plugin-ga": "^1.0.1",
-		"docsify-scroll-to-top": "^1.0.2",
-		"dompurify": "^2.3.3",
-		"download": "^8.0.0",
-		"jsdom": "^16.7.0",
-		"luxon": "^1.28.0",
-		"make-dir": "^3.1.0",
-		"markdown-table": "^3.0.1",
-		"node-fetch": "^3.1.0",
-		"nunjucks": "^3.2.3",
-		"vercel": "^27.0.0"
+		"@astrojs/check": "^0.5.10",
+		"@astrojs/sitemap": "^3.1.4",
+		"@astrojs/tailwind": "^5.1.0",
+		"@savvywombat/tailwindcss-grid-areas": "^4.0.0",
+		"astro": "^4.6.4",
+		"github-slugger": "^2.0.0",
+		"jsdom": "^24.0.0",
+		"tailwindcss": "^3.4.3",
+		"typescript": "^5.4.5"
 	},
 	"devDependencies": {
-		"@types/csso": "^5.0.0",
-		"@types/dompurify": "^2.3.1",
-		"@types/download": "^8.0.1",
-		"@types/jsdom": "^16.2.13",
-		"@types/less": "^3.0.3",
-		"@types/luxon": "^2.0.7",
-		"@types/nunjucks": "^3.2.0",
-		"less": "^4.1.2",
-		"typescript": "^4.5.2"
+		"@types/jsdom": "^21.1.6",
+		"prettier": "^3.2.5",
+		"prettier-plugin-astro": "^0.13.0",
+		"prettier-plugin-tailwindcss": "^0.5.14"
 	}
 }

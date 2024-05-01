@@ -1,0 +1,34 @@
+# Commonly ignored Node.js files
+node_modules
+npm-debug.log
+.npm
+
+# Build Output
+build
+
+# Static Files
+public
+
+# Jest
+coverage
+.swc
+junit.xml
+
+# Storybook
+storybook-static
+build-storybook.log
+.nyc_output
+
+# Vercel Files
+.vercel
+.turbo
+cache
+
+# Cache Files
+.eslintjscache
+.eslintmdcache
+.stylelintcache
+.prettiercache
+
+# TypeScript
+tsconfig.tsbuildinfo

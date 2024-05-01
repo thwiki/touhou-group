@@ -1,0 +1,127 @@
+---
+import type { MarkdownHeading } from 'astro';
+import TableOfContent from './TableOfContent.astro';
+import { getCollection } from 'astro:content';
+import type { Tree } from './TableOfContentsList.astro';
+import TableOfContentsList from './TableOfContentsList.astro';
+
+export type Props = {
+	title: string;
+	headings: MarkdownHeading[];
+};
+
+const { headings, title } = Astro.props;
+
+const listEntries = (await getCollection('lists')).sort((a, b) => a.data.id - b.data.id);
+
+const tree: Tree[] = listEntries.map((entry) => ({
+	depth: 1,
+	slug: `${entry.data.title}${title === entry.data.title ? '#_top' : ''}`,
+	text: entry.data.title,
+	children:
+		title === entry.data.title ? buildHeadingTree(headings.filter(({ depth }) => depth > 1)) : []
+}));
+
+function buildHeadingTree(headings: MarkdownHeading[]): Tree[] {
+	const root: Tree[] = [];
+	const stack: Tree[] = [];
+
+	for (const heading of headings) {
+		const node: Tree = {
+			depth: heading.depth,
+			text: heading.text,
+			slug: heading.slug,
+			children: []
+		};
+
+		if (stack.length === 0) {
+			// First node, or a new root-level node
+			root.push(node);
+			stack.push(node);
+		} else {
+			while (stack.length > 0 && stack[stack.length - 1].depth >= node.depth) {
+				// Pop until we find the appropriate parent level
+				stack.pop();
+			}
+
+			if (stack.length > 0) {
+				// Add node to the children of the item on top of the stack
+				stack[stack.length - 1].children.push(node);
+			} else {
+				// If stack is empty, this node is a new root
+				root.push(node);
+			}
+
+			// Push the current node onto the stack
+			stack.push(node);
+		}
+	}
+
+	return root;
+}
+---
+
+<aside
+	class="fixed bottom-0 top-0 w-50 overflow-y-auto border-r border-neutral-200 py-6 text-sm grid-in-sidebar md:w-64 md:py-10"
+>
+	<h1 class="mb-6 flex flex-col items-center">
+		<a href="/"><img alt="东方相关 QQ 群组列表" width="125" height="140" src="/logo.png" /></a>
+	</h1>
+	<ul class="space-y-2 px-4">
+		<li><h2 class="font-bold text-gray-600"><a href="/">东方相关 QQ 群组列表</a></h2></li>
+		<li class="-ml-4 md:ml-0">
+			<TableOfContent {tree} />
+		</li>
+		<li><h2 class="font-bold text-gray-600">THBWiki 相关页面</h2></li>
+		<li class="-ml-4 md:ml-0">
+			<TableOfContentsList
+				items={[
+					{ depth: 2, slug: 'https://thwiki.cc/', text: 'THBWiki主站', children: [] },
+					{
+						depth: 2,
+						slug: 'https://thwiki.cc/%E4%B8%9C%E6%96%B9Project',
+						text: '东方Project',
+						children: []
+					},
+					{
+						depth: 2,
+						slug: 'https://thwiki.cc/%E8%BF%91%E6%9C%9F%E5%B1%95%E4%BC%9A',
+						text: '近期展会',
+						children: []
+					},
+					{
+						depth: 2,
+						slug: 'https://thwiki.cc/%E6%97%A5%E7%A8%8B%E8%A1%A8#.E5.9B.BD.E5.86.85',
+						text: '国内展会列表',
+						children: []
+					},
+					{
+						depth: 2,
+						slug: 'https://thwiki.cc/%E5%90%8C%E4%BA%BA%E7%A4%BE%E5%9B%A2%E5%88%97%E8%A1%A8',
+						text: '同人社团列表',
+						children: []
+					}
+				]}
+			/>
+		</li>
+		<li><h2 class="font-bold text-gray-600">其他</h2></li>
+		<li class="-ml-4 md:ml-0">
+			<TableOfContentsList
+				items={[
+					{
+						depth: 2,
+						slug: 'https://thwiki.cc/%E8%AE%A8%E8%AE%BA:%E8%AE%A8%E8%AE%BA%E6%9D%BF',
+						text: '讨论板',
+						children: []
+					},
+					{
+						depth: 2,
+						slug: 'https://thwiki.cc/THBWiki:%E5%85%B3%E4%BA%8E',
+						text: '关于',
+						children: []
+					}
+				]}
+			/>
+		</li>
+	</ul>
+</aside>

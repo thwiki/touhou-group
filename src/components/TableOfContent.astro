@@ -1,0 +1,15 @@
+---
+import TableOfContentsList, { type Tree } from './TableOfContentsList.astro';
+
+export type Props = {
+	tree: Tree[];
+};
+
+const { tree } = Astro.props;
+---
+
+<scroll-spy data-min-h={1} data-max-h={3}>
+	<TableOfContentsList items={tree} />
+</scroll-spy>
+
+<script src="./ScrollSpy"></script>

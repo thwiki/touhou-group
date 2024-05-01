@@ -1,42 +1,28 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
-# compiled output
-/dist
-/tmp
-/out-tsc
-/public
+# build output
+dist/
+# generated types
+.astro/
 
 # dependencies
-/node_modules
+node_modules/
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
+# environment variables
+.env
+.env.production
 
-# System Files
+# macOS-specific files
 .DS_Store
-Thumbs.db
-.vercel
+
+# jetbrains setting folder
+.idea/
+
+# temporary data
+public/info.json
+src/content/lists/

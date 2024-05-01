@@ -2,8 +2,6 @@
 
 [![Node CI](https://github.com/thwiki/touhou-group/actions/workflows/deploy.yml/badge.svg)](https://github.com/thwiki/touhou-group/actions)
 [![license](https://img.shields.io/github/license/thwiki/touhou-group.svg)](https://github.com/thwiki/touhou-group/blob/master/LICENSE)
-![Dependencies](https://david-dm.org/thwiki/touhou-group.svg)
-![devDependencies](https://status.david-dm.org/gh/thwiki/touhou-group.svg?type=dev)
 
 [Website 网站](https://touhou.group)
 

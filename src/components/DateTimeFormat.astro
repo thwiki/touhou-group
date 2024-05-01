@@ -1,0 +1,37 @@
+---
+export type Props = {
+	date: Date;
+};
+
+const { date } = Astro.props;
+---
+
+<date-time-format
+	><time datetime={date.toISOString()}
+		>{
+			new Intl.DateTimeFormat('zh-Hans', {
+				dateStyle: 'long',
+				timeStyle: 'long'
+			}).format(date)
+		}</time
+	></date-time-format
+>
+
+<script>
+	export class DateTimeFormat extends HTMLElement {
+		constructor() {
+			super();
+
+			const times = [...this.querySelectorAll('time')];
+			for (const time of times) {
+				const date = new Date(time.dateTime ?? '');
+				time.innerText = new Intl.DateTimeFormat('zh-Hans', {
+					dateStyle: 'long',
+					timeStyle: 'long'
+				}).format(date);
+			}
+		}
+	}
+
+	customElements.define('date-time-format', DateTimeFormat);
+</script>

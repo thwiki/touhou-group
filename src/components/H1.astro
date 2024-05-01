@@ -1,0 +1,11 @@
+---
+export type Props = {
+	id: string;
+};
+
+const { id } = Astro.props;
+---
+
+<h1 id={id} class="mb-5 scroll-mt-20 text-4xl font-bold text-gray-700">
+	<a href={`#${id}`}><slot /></a>
+</h1>

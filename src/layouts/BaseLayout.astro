@@ -1,0 +1,61 @@
+---
+import type { MarkdownHeading } from 'astro';
+import Footer from '../components/Footer.astro';
+import Main from '../components/Main.astro';
+import Sidebar from '../components/Sidebar.astro';
+import type { CollectionEntry } from 'astro:content';
+
+export type Props = {
+	slug: string;
+	headings: MarkdownHeading[];
+	frontmatter?: CollectionEntry<'lists'>['data'];
+};
+
+const { headings, frontmatter } = Astro.props;
+---
+
+<html lang="zh-Hans">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap"
+			rel="stylesheet"
+		/>
+		<meta name="generator" content={Astro.generator} />
+		<title>
+			{frontmatter?.title ? frontmatter.title + ' - 东方相关 QQ 群组列表' : '东方相关 QQ 群组列表'}
+		</title>
+	</head>
+	<body>
+		<div
+			class="grid size-full min-h-screen grid-cols-layout grid-rows-layout text-neutral-950 transition-all grid-areas-layout md:grid-cols-layout-md"
+		>
+			<Sidebar {headings} title={frontmatter?.title ?? ''} />
+			<Main>
+				<slot />
+			</Main>
+			<Footer />
+		</div>
+	</body>
+</html>
+
+<style is:global>
+	html,
+	body {
+		@apply w-full;
+		scrollbar-gutter: auto;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	body {
+		@apply bg-white;
+		scroll-behavior: smooth;
+	}
+
+	* {
+		@apply min-w-0;
+	}
+</style>

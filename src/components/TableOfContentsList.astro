@@ -1,0 +1,49 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+export interface Tree extends MarkdownHeading {
+	children: Tree[];
+}
+
+export type Props = {
+	items: Tree[];
+};
+
+const { items } = Astro.props;
+---
+
+<ul>
+	{
+		items.map((heading) => (
+			<li class="ml-2 border-l border-gray-200 pl-2">
+				<a
+					class="block overflow-hidden text-ellipsis whitespace-nowrap rounded px-2 py-1 outline-none ring-amber-300 ring-offset-1 transition-colors hover:bg-gray-100 focus:ring-2 active:bg-amber-500"
+					class:list={{
+						'text-gray-700': heading.depth === 1,
+						'text-gray-600': heading.depth > 1
+					}}
+					href={
+						heading.slug.startsWith('https://')
+							? heading.slug
+							: heading.depth === 1
+								? `/${heading.slug}/`
+								: `#${heading.slug}`
+					}
+					aria-current={heading.slug.endsWith('#_top') ? 'true' : undefined}
+					target={heading.slug.startsWith('https://') ? '_blank' : undefined}
+				>
+					{heading.text}
+				</a>
+				{heading.children && heading.children.length > 0 ? (
+					<Astro.self items={heading.children} />
+				) : null}
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	a[aria-current='true'] {
+		@apply bg-amber-500 font-medium text-white;
+	}
+</style>

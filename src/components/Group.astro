@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Picture } from 'astro:assets';
+
+export type Props = {
+	group: CollectionEntry<'lists'>['data']['sections'][number]['groups'][number];
+};
+
+const { group } = Astro.props;
+---
+
+<div
+	class="grid grid-cols-card grid-rows-card gap-y-2 rounded-lg border border-gray-200 bg-gray-20 p-4 shadow-sm transition-colors grid-areas-card hover:bg-gray-100"
+>
+	<div class="flex flex-wrap gap-x-2 gap-y-1 grid-in-labels">
+		{
+			group.labels.map((label) => (
+				<div
+					class="overflow-hidden text-ellipsis whitespace-nowrap rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-semibold text-white transition-colors first:bg-blue-600"
+					title={label}
+				>
+					{label}
+				</div>
+			))
+		}
+	</div>
+	{
+		group.image ? (
+			<a
+				class="mr-2 flex w-20 flex-col items-center outline-none ring-blue-300 ring-offset-1 grid-in-image focus:ring-2 active:bg-blue-500"
+				href={group.link}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<Picture class="rounded-md" src={group.image} alt={group.name} loading="lazy" />
+			</a>
+		) : (
+			<div />
+		)
+	}
+	<div class="flex-1 grid-in-content">
+		<div class="text-lg font-bold">{group.id}</div>
+		<div class="line-clamp-2 text-gray-700">{group.name}</div>
+		{group.memo !== '' && <div class="mt-2 text-xs text-gray-500">{group.memo}</div>}
+	</div>
+</div>

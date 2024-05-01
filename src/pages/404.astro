@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import H1 from '../components/H1.astro';
+
+export const listEntries = (await getCollection('lists')).sort((a, b) => a.data.id - b.data.id);
+---
+
+<BaseLayout slug="" headings={[]}>
+	<H1 id="_top">404 - Not found</H1>
+
+	<p>
+		<a class="text-lg font-medium text-amber-500 underline" href="/">回到首页</a>
+	</p>
+</BaseLayout>
