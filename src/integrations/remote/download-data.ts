@@ -13,7 +13,7 @@ export async function downloadData(
 	info: z.infer<typeof InfoSchema>,
 	{ infoDestinationFile, jsonDestinationDir, imageDestinationRelDir }: DownloadDataConfig
 ) {
-	await rm(jsonDestinationDir, { recursive: true });
+	await rm(jsonDestinationDir, { recursive: true, force: true });
 	await mkdir(jsonDestinationDir, { recursive: true });
 	await mkdir(`${jsonDestinationDir}/${imageDestinationRelDir}`, { recursive: true });
 

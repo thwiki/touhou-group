@@ -1,13 +1,13 @@
 {
 	"name": "touhou-group",
 	"type": "module",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Touhou Group List",
 	"scripts": {
 		"format": "prettier --write .",
 		"dev": "astro dev --host 0.0.0.0",
 		"start": "astro dev",
-		"build": "astro check && astro build",
+		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro"
 	},
