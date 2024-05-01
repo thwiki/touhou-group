@@ -13,9 +13,6 @@ export default {
 					20: '#fdfdfe'
 				}
 			},
-			fontFamily: {
-				sans: ['"Noto Sans TC"', ...defaultTheme.fontFamily.sans]
-			},
 			gridTemplateAreas: {
 				layout: ['sidebar main', 'sidebar footer'],
 				card: ['labels labels', 'image content']
