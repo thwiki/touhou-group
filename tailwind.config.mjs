@@ -18,8 +18,9 @@ export default {
 				card: ['labels labels', 'image content']
 			},
 			gridTemplateColumns: {
-				'layout-md': '16rem 1fr',
-				layout: '12.5rem 1fr',
+				'layout-sm': '0 1fr',
+				'layout-md': '12.5rem 1fr',
+				'layout-lg': '16rem 1fr',
 				cards: 'repeat(auto-fill,minmax(15rem,1fr))',
 				card: 'auto 1fr'
 			},

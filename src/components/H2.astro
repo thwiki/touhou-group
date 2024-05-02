@@ -6,6 +6,6 @@ export type Props = {
 const { id } = Astro.props;
 ---
 
-<h2 id={id} class="mb-4 mt-12 text-3xl font-bold text-gray-700">
+<h2 id={id} class="mb-4 mt-12 scroll-mt-8 text-3xl font-bold text-gray-700">
 	<a href={`#${id}`}><slot /></a>
 </h2>

@@ -17,14 +17,15 @@ export async function downloadData(
 	await mkdir(jsonDestinationDir, { recursive: true });
 	await mkdir(`${jsonDestinationDir}/${imageDestinationRelDir}`, { recursive: true });
 
+	const images: {
+		source: string;
+		target: string;
+	}[] = [];
+
 	for (const list of info.lists) {
 		const writePath = path.join(jsonDestinationDir, `${list.title}.json`);
 		const { sections } = list;
 
-		const images: {
-			source: string;
-			target: string;
-		}[] = [];
 		for (const section of sections) {
 			for (const group of section.groups) {
 				if (group.image) {
@@ -39,14 +40,12 @@ export async function downloadData(
 		}
 
 		await writeFile(writePath, JSON.stringify(list), 'utf-8');
+	}
 
-		await Promise.all(
-			images.map(async (image) =>
-				writeFile(
-					path.join(jsonDestinationDir, image.target),
-					Buffer.from(await (await fetch(image.source)).arrayBuffer())
-				)
-			)
+	for (const image of images) {
+		writeFile(
+			path.join(jsonDestinationDir, image.target),
+			Buffer.from(await (await fetch(image.source)).arrayBuffer())
 		);
 	}
 

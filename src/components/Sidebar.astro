@@ -62,66 +62,82 @@ function buildHeadingTree(headings: MarkdownHeading[]): Tree[] {
 ---
 
 <aside
-	class="fixed bottom-0 top-0 w-50 overflow-y-auto border-r border-neutral-200 py-6 text-sm grid-in-sidebar md:w-64 md:py-10"
+	class="group fixed bottom-0 top-0 w-50 -translate-x-full border-r border-neutral-200 bg-white text-sm transition-transform grid-in-sidebar focus-within:translate-x-0 focus-within:shadow-md sm:translate-x-0 sm:shadow-none md:w-64"
 >
-	<h1 class="mb-6 flex flex-col items-center">
-		<a href="/"><img alt="东方相关 QQ 群组列表" width="125" height="140" src="/logo.png" /></a>
-	</h1>
-	<ul class="space-y-2 px-4">
-		<li><h2 class="font-bold text-gray-600"><a href="/">东方相关 QQ 群组列表</a></h2></li>
-		<li class="-ml-4 md:ml-0">
-			<TableOfContent {tree} />
-		</li>
-		<li><h2 class="font-bold text-gray-600">THBWiki 相关页面</h2></li>
-		<li class="-ml-4 md:ml-0">
-			<TableOfContentsList
-				items={[
-					{ depth: 2, slug: 'https://thwiki.cc/', text: 'THBWiki主站', children: [] },
-					{
-						depth: 2,
-						slug: 'https://thwiki.cc/%E4%B8%9C%E6%96%B9Project',
-						text: '东方Project',
-						children: []
-					},
-					{
-						depth: 2,
-						slug: 'https://thwiki.cc/%E8%BF%91%E6%9C%9F%E5%B1%95%E4%BC%9A',
-						text: '近期展会',
-						children: []
-					},
-					{
-						depth: 2,
-						slug: 'https://thwiki.cc/%E6%97%A5%E7%A8%8B%E8%A1%A8#.E5.9B.BD.E5.86.85',
-						text: '国内展会列表',
-						children: []
-					},
-					{
-						depth: 2,
-						slug: 'https://thwiki.cc/%E5%90%8C%E4%BA%BA%E7%A4%BE%E5%9B%A2%E5%88%97%E8%A1%A8',
-						text: '同人社团列表',
-						children: []
-					}
-				]}
-			/>
-		</li>
-		<li><h2 class="font-bold text-gray-600">其他</h2></li>
-		<li class="-ml-4 md:ml-0">
-			<TableOfContentsList
-				items={[
-					{
-						depth: 2,
-						slug: 'https://thwiki.cc/%E8%AE%A8%E8%AE%BA:%E8%AE%A8%E8%AE%BA%E6%9D%BF',
-						text: '讨论板',
-						children: []
-					},
-					{
-						depth: 2,
-						slug: 'https://thwiki.cc/THBWiki:%E5%85%B3%E4%BA%8E',
-						text: '关于',
-						children: []
-					}
-				]}
-			/>
-		</li>
-	</ul>
+	<button
+		class="absolute left-full rounded-br border-b border-r border-gray-300 bg-white p-2 text-sm shadow transition-colors hover:bg-gray-200 focus:bg-white active:shadow-none group-focus-within:bg-amber-500 group-focus-within:text-white group-focus-within:shadow-none sm:hidden"
+		><svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 20 20"
+			fill="currentColor"
+			class="h-5 w-5"
+		>
+			<path
+				fill-rule="evenodd"
+				d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z"
+				clip-rule="evenodd"></path>
+		</svg>
+	</button>
+	<div class="size-full overflow-y-auto py-6 md:py-10">
+		<h1 class="mb-6 flex flex-col items-center px-4">
+			<a href="/"><img alt="东方相关 QQ 群组列表" width="125" height="140" src="/logo.png" /></a>
+		</h1>
+		<ul class="space-y-2 px-4">
+			<li><h2 class="font-bold text-gray-600"><a href="/">东方相关 QQ 群组列表</a></h2></li>
+			<li class="-ml-4 md:ml-0">
+				<TableOfContent {tree} />
+			</li>
+			<li><h2 class="font-bold text-gray-600">THBWiki 相关页面</h2></li>
+			<li class="-ml-4 md:ml-0">
+				<TableOfContentsList
+					items={[
+						{ depth: 2, slug: 'https://thwiki.cc/', text: 'THBWiki主站', children: [] },
+						{
+							depth: 2,
+							slug: 'https://thwiki.cc/%E4%B8%9C%E6%96%B9Project',
+							text: '东方Project',
+							children: []
+						},
+						{
+							depth: 2,
+							slug: 'https://thwiki.cc/%E8%BF%91%E6%9C%9F%E5%B1%95%E4%BC%9A',
+							text: '近期展会',
+							children: []
+						},
+						{
+							depth: 2,
+							slug: 'https://thwiki.cc/%E6%97%A5%E7%A8%8B%E8%A1%A8#.E5.9B.BD.E5.86.85',
+							text: '国内展会列表',
+							children: []
+						},
+						{
+							depth: 2,
+							slug: 'https://thwiki.cc/%E5%90%8C%E4%BA%BA%E7%A4%BE%E5%9B%A2%E5%88%97%E8%A1%A8',
+							text: '同人社团列表',
+							children: []
+						}
+					]}
+				/>
+			</li>
+			<li><h2 class="font-bold text-gray-600">其他</h2></li>
+			<li class="-ml-4 md:ml-0">
+				<TableOfContentsList
+					items={[
+						{
+							depth: 2,
+							slug: 'https://thwiki.cc/%E8%AE%A8%E8%AE%BA:%E8%AE%A8%E8%AE%BA%E6%9D%BF',
+							text: '讨论板',
+							children: []
+						},
+						{
+							depth: 2,
+							slug: 'https://thwiki.cc/THBWiki:%E5%85%B3%E4%BA%8E',
+							text: '关于',
+							children: []
+						}
+					]}
+				/>
+			</li>
+		</ul>
+	</div>
 </aside>
