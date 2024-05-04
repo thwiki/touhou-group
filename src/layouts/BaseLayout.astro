@@ -6,8 +6,7 @@ import Sidebar from '../components/Sidebar.astro';
 import type { CollectionEntry } from 'astro:content';
 
 export type Props = {
-	slug: string;
-	headings: MarkdownHeading[];
+	headings?: MarkdownHeading[];
 	frontmatter?: CollectionEntry<'lists'>['data'];
 };
 
@@ -40,7 +39,7 @@ const { headings, frontmatter } = Astro.props;
 		<div
 			class="grid size-full min-h-screen grid-cols-layout-sm grid-rows-layout text-neutral-950 transition-all grid-areas-layout sm:grid-cols-layout-md md:grid-cols-layout-lg"
 		>
-			<Sidebar {headings} title={frontmatter?.title ?? ''} />
+			<Sidebar headings={headings ?? []} title={frontmatter?.title ?? ''} />
 			<Main>
 				<slot />
 			</Main>

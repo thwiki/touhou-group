@@ -45,10 +45,10 @@ for (const location of locations) {
 								class:list={[location.class]}
 								d="M0 0l-28 16.86v31l28 15.86 28-15.86v-31Z"
 							/>
-							<text class="text-lg font-medium" x="0" y="29">
+							<text class="text-lg font-medium [text-anchor:middle]" x="0" y="29">
 								{count}
 							</text>
-							<text class="text-sm" x="0" y="47">
+							<text class="text-sm [text-anchor:middle]" x="0" y="47">
 								{location.name}
 							</text>
 						</a>
@@ -58,9 +58,3 @@ for (const location of locations) {
 		</svg>
 	)
 }
-
-<style>
-	text {
-		text-anchor: middle;
-	}
-</style>

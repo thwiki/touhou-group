@@ -42,8 +42,8 @@ const { items } = Astro.props;
 	}
 </ul>
 
-<style>
-	a[aria-current='true'] {
+<style is:global>
+	aside a[aria-current='true'] {
 		@apply bg-amber-500 font-medium text-white;
 	}
 </style>
