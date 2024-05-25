@@ -17,7 +17,7 @@ const { items } = Astro.props;
 		items.map((heading) => (
 			<li class="ml-2 border-l border-gray-200 pl-2">
 				<a
-					class="block overflow-hidden text-ellipsis whitespace-nowrap rounded px-2 py-1 outline-none ring-amber-300 ring-offset-1 transition-colors hover:bg-gray-100 focus:ring-2 active:bg-amber-500"
+					class="aria-current:bg-amber-500 aria-current:font-medium aria-current:text-white aria-current:hover:bg-amber-400 block overflow-hidden text-ellipsis whitespace-nowrap rounded px-2 py-1 outline-none ring-amber-300 ring-offset-1 transition-colors hover:bg-gray-100 focus:ring-2 active:bg-amber-500"
 					class:list={{
 						'text-gray-700': heading.depth === 1,
 						'text-gray-600': heading.depth > 1
@@ -41,9 +41,3 @@ const { items } = Astro.props;
 		))
 	}
 </ul>
-
-<style is:global>
-	aside a[aria-current='true'] {
-		@apply bg-amber-500 font-medium text-white;
-	}
-</style>
