@@ -22,11 +22,11 @@
 	},
 	"homepage": "https://github.com/thwiki/touhou-group",
 	"dependencies": {
-		"@astrojs/check": "^0.5.10",
-		"@astrojs/sitemap": "^3.1.4",
+		"@astrojs/check": "^0.7.0",
+		"@astrojs/sitemap": "^3.1.5",
 		"@astrojs/tailwind": "^5.1.0",
 		"@savvywombat/tailwindcss-grid-areas": "^4.0.0",
-		"astro": "^4.6.4",
+		"astro": "^4.9.1",
 		"github-slugger": "^2.0.0",
 		"jsdom": "^24.0.0",
 		"tailwindcss": "^3.4.3",
@@ -35,7 +35,8 @@
 	"devDependencies": {
 		"@types/jsdom": "^21.1.6",
 		"prettier": "^3.2.5",
-		"prettier-plugin-astro": "^0.13.0",
-		"prettier-plugin-tailwindcss": "^0.5.14"
+		"prettier-plugin-astro": "^0.14.0",
+		"prettier-plugin-tailwindcss": "^0.5.14",
+		"tailwindcss-aria-attributes": "^2.0.1"
 	}
 }
