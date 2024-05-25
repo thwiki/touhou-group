@@ -7,5 +7,5 @@ const { id } = Astro.props;
 ---
 
 <h3 id={id} class="mb-2 mt-6 scroll-mt-8 text-2xl font-bold text-gray-700">
-	<a href={`#${id}`}><slot /></a>
+	<slot />
 </h3>
