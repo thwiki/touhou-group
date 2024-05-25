@@ -62,15 +62,21 @@ function buildHeadingTree(headings: MarkdownHeading[]): Tree[] {
 ---
 
 <aside
-	class="group fixed bottom-0 top-0 w-50 -translate-x-full border-r border-neutral-200 bg-white text-sm transition-transform grid-in-sidebar focus-within:translate-x-0 focus-within:shadow-md sm:translate-x-0 sm:shadow-none md:w-64"
+	id="sidebar"
+	class="group fixed bottom-0 top-0 w-50 -translate-x-full border-r border-neutral-200 bg-white text-sm transition-transform grid-in-sidebar aria-expanded:translate-x-0 aria-expanded:shadow-md sm:translate-x-0 sm:shadow-none md:w-64"
+	aria-label="侧边栏"
+	aria-expanded="false"
 >
 	<button
-		class="absolute left-full rounded-br border-b border-r border-gray-300 bg-white p-2 text-sm shadow transition-colors hover:bg-gray-200 focus:bg-white active:shadow-none group-focus-within:bg-amber-500 group-focus-within:text-white group-focus-within:shadow-none sm:hidden"
+		id="sidebar-toggle"
+		class="absolute left-full rounded-br border border-gray-300 border-l-transparent border-t-transparent bg-white p-2 text-sm shadow transition-colors hover:bg-gray-200 focus:bg-white active:shadow-none aria-expanded:shadow-none group-aria-expanded:bg-amber-500 group-aria-expanded:text-white sm:hidden"
+		tabindex="0"
+		aria-label="开关侧边栏"
 		><svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 20 20"
 			fill="currentColor"
-			class="h-5 w-5"
+			class="h-6 w-6"
 		>
 			<path
 				fill-rule="evenodd"
@@ -82,8 +88,10 @@ function buildHeadingTree(headings: MarkdownHeading[]): Tree[] {
 		<h1 class="mb-6 flex flex-col items-center px-4">
 			<a href="/"><img alt="东方相关 QQ 群组列表" width="125" height="140" src="/logo.png" /></a>
 		</h1>
-		<ul class="space-y-2 px-4">
-			<li><h2 class="font-bold text-gray-600"><a href="/">东方相关 QQ 群组列表</a></h2></li>
+		<ul class="space-y-2 px-4" aria-label="目录">
+			<li>
+				<h2 class="font-bold text-gray-600"><a href="/">东方相关 QQ 群组列表</a></h2>
+			</li>
 			<li class="-ml-4 md:ml-0">
 				<TableOfContent {tree} />
 			</li>
@@ -141,3 +149,19 @@ function buildHeadingTree(headings: MarkdownHeading[]): Tree[] {
 		</ul>
 	</div>
 </aside>
+
+<script>
+	const sidebarToggle = document.getElementById('sidebar-toggle')!;
+	const sidebar = document.getElementById('sidebar')!;
+	sidebarToggle.addEventListener('click', () => {
+		sidebar.setAttribute(
+			'aria-expanded',
+			sidebar.matches('[aria-expanded="true"]') ? 'false' : 'true'
+		);
+	});
+	document.body.addEventListener('click', (event) => {
+		if (sidebar.matches('[aria-expanded="true"]') && !sidebar.contains(event.target as Node)) {
+			sidebar.setAttribute('aria-expanded', 'false');
+		}
+	});
+</script>
