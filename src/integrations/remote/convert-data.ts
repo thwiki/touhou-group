@@ -96,7 +96,7 @@ export async function convertData(config: ConvertDataConfig) {
 						labels: labelCells
 							.map((cell) => (cell.textContent ?? '').trim())
 							.reverse()
-							.flatMap((label) => label.split(/、|，/))
+							.flatMap((label) => label.split(/：|、|，/))
 							.map((label) => (label.match(/^\s*\[([^\[\]]+)\]/)?.[1] ?? label).trim())
 							.filter((label) => !['', '-'].includes(label)),
 						memo: (memoCell.textContent ?? '').trim(),
