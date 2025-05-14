@@ -91,6 +91,7 @@ export async function convertData(config: ConvertDataConfig) {
 						row.querySelectorAll('td')
 					).reverse();
 					return {
+						depth: section.depth,
 						id: (idCell.textContent ?? '').trim(),
 						name: (nameCell.textContent ?? '').trim(),
 						labels: labelCells

@@ -14,6 +14,7 @@ const listsCollection = defineCollection({
 					text: z.string(),
 					groups: z.array(
 						z.object({
+							depth: z.union([z.literal(1), z.literal(2), z.literal(3)]),
 							id: z.string().regex(/^\d+$/, { message: 'Must be numeric' }),
 							name: z.string().min(1),
 							labels: z.array(z.string()),
