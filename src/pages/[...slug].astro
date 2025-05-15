@@ -19,7 +19,7 @@ const { entry } = Astro.props;
 const { sections } = entry.data;
 ---
 
-<BaseLayout slug={entry.data.title} frontmatter={entry.data} headings={sections}>
+<BaseLayout frontmatter={entry.data} headings={sections}>
 	<H1 id="_top">{entry.data.title}</H1>
 	<Map {sections} />
 	{
