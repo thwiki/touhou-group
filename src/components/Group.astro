@@ -20,7 +20,7 @@ const { group } = Astro.props;
 		{
 			group.labels.map((label) => (
 				<div
-					class={`overflow-hidden text-ellipsis whitespace-nowrap rounded-full ${group.labels.length > group.depth ? 'bg-gray-400' : 'bg-amber-500'} px-2.5 py-0.5 text-xs font-semibold text-white transition-colors first:bg-blue-600 ${group.labels.length > group.depth && group.depth > 2 ?'last:bg-amber-500' : ''}`}
+					class={`overflow-hidden text-ellipsis whitespace-nowrap rounded-full ${group.labels.length > group.labelsLength ? 'bg-gray-400' : 'bg-amber-500'} px-2.5 py-0.5 text-xs font-semibold text-white transition-colors first:bg-blue-600 ${group.labels.length > group.labelsLength && group.labelsLength > 1 ?'last:bg-amber-500' : ''}`}
 					title={label}
 				>
 					{label}

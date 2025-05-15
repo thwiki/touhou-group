@@ -57,10 +57,10 @@ export const SourceParseSchema = z.object({
 });
 
 export const GroupSchema = z.object({
-	depth: z.number(),
 	id: z.string().regex(/^\d+$/, { message: 'Must be numeric' }),
 	name: z.string().min(1),
 	labels: z.array(z.string()),
+	labelsLength: z.number(),
 	memo: z.string(),
 	image: z.string().url().optional(),
 	link: z.string().url().optional()

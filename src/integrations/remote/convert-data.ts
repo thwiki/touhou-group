@@ -91,7 +91,6 @@ export async function convertData(config: ConvertDataConfig) {
 						row.querySelectorAll('td')
 					).reverse();
 					return {
-						depth: section.depth,
 						id: (idCell.textContent ?? '').trim(),
 						name: (nameCell.textContent ?? '').trim(),
 						labels: labelCells
@@ -100,6 +99,7 @@ export async function convertData(config: ConvertDataConfig) {
 							.flatMap((label) => label.split(/：|、|，/))
 							.map((label) => (label.match(/^\s*\[([^\[\]]+)\]/)?.[1] ?? label).trim())
 							.filter((label) => !['', '-'].includes(label)),
+						labelsLength: labelCells.length,
 						memo: (memoCell.textContent ?? '').trim(),
 						...extractImageAndLink(memoCell, config)
 					};
