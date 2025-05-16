@@ -23,6 +23,9 @@ export async function downloadData(
 	}[] = [];
 
 	for (const list of info.lists) {
+		if (list.title === '注释') {
+			continue;
+		}
 		const writePath = path.join(jsonDestinationDir, `${list.title}.json`);
 		const { sections } = list;
 
