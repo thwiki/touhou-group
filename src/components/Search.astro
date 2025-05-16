@@ -1,0 +1,118 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+const listEntries = (await getCollection('lists')).sort((a, b) => a.data.id - b.data.id);
+
+// 获取所有唯一的标签
+const allLabels = new Set<string>();
+listEntries.forEach((entry: CollectionEntry<'lists'>) => {
+  entry.data.sections.forEach((section) => {
+    section.groups.forEach((group) => {
+      group.labels.forEach((label: string) => allLabels.add(label));
+    });
+  });
+});
+---
+
+<div class="mb-8 mt-8 flex justify-center">
+  <div class="relative w-full max-w-md">
+    <input
+      type="text"
+      id="search-input"
+      class="w-full rounded-full border border-gray-200 bg-gray-50 px-6 py-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+      placeholder="输入标签进行搜索..."
+    />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+      />
+    </svg>
+  </div>
+</div>
+<div id="no-results" class="mt-4 hidden text-center text-gray-500">
+  没有找到匹配的群组
+</div>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const groupCards = document.querySelectorAll<HTMLElement>('[id^="group-"]');
+  const noResults = document.getElementById('no-results') as HTMLElement;
+  
+  // 清空搜索并显示所有内容
+  function clearSearch() {
+    searchInput.value = '';
+    searchInput.dispatchEvent(new Event('input'));
+  }
+  
+  // 监听搜索输入
+  searchInput.addEventListener('input', () => {
+    const searchText = searchInput.value.trim().toLowerCase();
+    
+    // 创建一个 Map 来跟踪每个标题下是否有可见的卡片
+    const sectionVisibility = new Map<string, boolean>();
+    let hasVisibleCards = false;
+    
+    groupCards.forEach(card => {
+      const cardLabels = Array.from(card.querySelectorAll<HTMLElement>('.grid-in-labels > div'))
+        .map(label => label.textContent?.trim().toLowerCase())
+        .filter((label): label is string => label !== undefined);
+      
+      // 如果搜索框为空，显示所有卡片
+      // 否则只显示包含搜索文本的卡片
+      const shouldShow = searchText === '' || 
+        cardLabels.some(label => label.includes(searchText));
+      
+      card.style.display = shouldShow ? '' : 'none';
+      if (shouldShow) hasVisibleCards = true;
+      
+      // 获取卡片所属的标题元素
+      const sectionId = card.closest('section')?.id;
+      if (sectionId) {
+        sectionVisibility.set(sectionId, sectionVisibility.get(sectionId) || shouldShow);
+      }
+    });
+    
+    // 更新标题的显示状态
+    document.querySelectorAll('section').forEach((section) => {
+      const sectionId = section.id;
+      // 如果是标题部分（包含地图），始终显示
+      if (sectionId === 'title-section') {
+        section.style.display = '';
+        return;
+      }
+      const hasVisibleCards = sectionVisibility.get(sectionId) || false;
+      section.style.display = hasVisibleCards ? '' : 'none';
+    });
+
+    // 显示或隐藏无结果提示
+    if (searchText !== '' && !hasVisibleCards) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+    }
+  });
+
+  // 监听侧边栏链接点击
+  document.querySelectorAll('#sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      clearSearch();
+    });
+  });
+
+  // 监听地图区域点击
+  document.querySelectorAll('svg a').forEach(link => {
+    link.addEventListener('click', () => {
+      clearSearch();
+    });
+  });
+</script>

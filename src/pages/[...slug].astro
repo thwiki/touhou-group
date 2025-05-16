@@ -6,6 +6,7 @@ import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
 import Map from '../components/Map.astro';
+import Search from '../components/Search.astro';
 
 export async function getStaticPaths() {
 	const listEntries = await getCollection('lists');
@@ -20,13 +21,16 @@ const { sections } = entry.data;
 ---
 
 <BaseLayout frontmatter={entry.data} headings={sections}>
-	<H1 id="_top">{entry.data.title}</H1>
-	<Map {sections} />
+	<section id="title-section">
+		<H1 id="_top">{entry.data.title}</H1>
+		<Map {sections} />
+	</section>
+	<Search />
 	{
 		sections.map((section) => {
 			const Heading = section.depth === 2 ? H2 : H3;
 			return (
-				<>
+				<section id={section.slug}>
 					<Heading id={section.slug}>
 						<a href={`#${section.slug}`}>{section.text}</a>
 					</Heading>
@@ -35,7 +39,7 @@ const { sections } = entry.data;
 							<Group {group} />
 						))}
 					</div>
-				</>
+				</section>
 			);
 		})
 	}
