@@ -45,7 +45,7 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
 
 <script>
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const groupCards = document.querySelectorAll<HTMLElement>('[id^="group-"]');
+  const groupCards = document.querySelectorAll<HTMLElement>('.grid-areas-card[id^="group-"]');
   const noResults = document.getElementById('no-results') as HTMLElement;
   
   // 从 URL 获取搜索参数
@@ -145,23 +145,7 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
         section.style.display = '';
         return;
       }
-      const hasVisibleCards = sectionVisibility.get(sectionId) || false;
-      // 只隐藏section本身，不影响其内部元素的显示
-      const sectionElement = section as HTMLElement;
-      sectionElement.style.display = hasVisibleCards ? '' : 'none';
-      
-      // 确保section内的所有卡片内容可见
-      if (hasVisibleCards) {
-        section.querySelectorAll('[id^="group-"]').forEach(card => {
-          const cardElement = card as HTMLElement;
-          if (cardElement.style.display !== 'none') {
-            // 确保卡片内的所有内容可见
-            cardElement.querySelectorAll('div').forEach(div => {
-              (div as HTMLElement).style.display = '';
-            });
-          }
-        });
-      }
+
     });
 
     // 显示或隐藏无结果提示
