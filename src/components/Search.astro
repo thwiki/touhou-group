@@ -67,10 +67,18 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
         .map(label => label.textContent?.trim().toLowerCase())
         .filter((label): label is string => label !== undefined);
       
+      // 获取群名、群号和群简介
+      const groupId = card.querySelector<HTMLElement>('.grid-in-content > div:first-child')?.textContent?.trim().toLowerCase() || '';
+      const groupName = card.querySelector<HTMLElement>('.grid-in-content > div:nth-child(2)')?.textContent?.trim().toLowerCase() || '';
+      const groupMemo = card.querySelector<HTMLElement>('.grid-in-content > div:last-child')?.textContent?.trim().toLowerCase() || '';
+      
       // 如果搜索框为空，显示所有卡片
-      // 否则只显示包含搜索文本的卡片
+      // 否则检查标签、群名、群号或群简介是否包含搜索文本
       const shouldShow = searchText === '' || 
-        cardLabels.some(label => label.includes(searchText));
+        cardLabels.some(label => label.includes(searchText)) ||
+        groupName.includes(searchText) ||
+        groupId.includes(searchText) ||
+        groupMemo.includes(searchText);
       
       const cardElement = card as HTMLElement;
       cardElement.style.display = shouldShow ? '' : 'none';
