@@ -21,40 +21,42 @@ for (const location of locations) {
 
 {
 	enabled && (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			class="h-auto max-w-full select-none fill-current"
-			width="540"
-			height="540"
-			viewBox="0 0 540 540"
-		>
-			{locations.map((location) => {
-				const count = counts[location.id];
-				const x = Math.round((location.x - 1) * 60 - (location.y % 2) * 30);
-				const y = Math.round((location.y - 1) * 52.9);
+		<div class="flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				version="1.1"
+				class="h-auto max-w-full select-none fill-current"
+				width="540"
+				height="540"
+				viewBox="0 0 540 540"
+			>
+				{locations.map((location) => {
+					const count = counts[location.id];
+					const x = Math.round((location.x - 1) * 60 - (location.y % 2) * 30);
+					const y = Math.round((location.y - 1) * 52.9);
 
-				return (
-					<g
-						class:list={{ 'pointer-events-none opacity-50': count === 0 }}
-						transform={`translate(${x},${y})`}
-					>
-						<a href={`#${location.id}`} class="group">
-							<path
-								class="transition-filter group-hover:saturate-300 duration-150 group-hover:brightness-75"
-								class:list={[location.class]}
-								d="M0 0l-28 16.86v31l28 15.86 28-15.86v-31Z"
-							/>
-							<text class="text-lg font-medium [text-anchor:middle]" x="0" y="29">
-								{count}
-							</text>
-							<text class="text-sm [text-anchor:middle]" x="0" y="47">
-								{location.name}
-							</text>
-						</a>
-					</g>
-				);
-			})}
-		</svg>
+					return (
+						<g
+							class:list={{ 'pointer-events-none opacity-50': count === 0 }}
+							transform={`translate(${x},${y})`}
+						>
+							<a href={`#${location.id}`} class="group">
+								<path
+									class="transition-filter group-hover:saturate-300 duration-150 group-hover:brightness-75"
+									class:list={[location.class]}
+									d="M0 0l-28 16.86v31l28 15.86 28-15.86v-31Z"
+								/>
+								<text class="text-lg font-medium [text-anchor:middle]" x="0" y="29">
+									{count}
+								</text>
+								<text class="text-sm [text-anchor:middle]" x="0" y="47">
+									{location.name}
+								</text>
+							</a>
+						</g>
+					);
+				})}
+			</svg>
+		</div>
 	)
 }
