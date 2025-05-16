@@ -61,6 +61,13 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
     // 创建一个 Map 来跟踪每个标题下是否有可见的卡片
     const sectionVisibility = new Map<string, boolean>();
     let hasVisibleCards = false;
+
+    // 高亮文本的函数
+    function highlightText(text: string, searchText: string): string {
+      if (!searchText) return text;
+      const regex = new RegExp(`(${searchText})`, 'gi');
+      return text.replace(regex, '<mark class="bg-amber-200">$1</mark>');
+    }
     
     groupCards.forEach(card => {
       const cardLabels = Array.from(card.querySelectorAll<HTMLElement>('.grid-in-labels > div'))
@@ -68,22 +75,40 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
         .filter((label): label is string => label !== undefined);
       
       // 获取群名、群号和群简介
-      const groupId = card.querySelector<HTMLElement>('.grid-in-content > div:first-child')?.textContent?.trim().toLowerCase() || '';
-      const groupName = card.querySelector<HTMLElement>('.grid-in-content > div:nth-child(2)')?.textContent?.trim().toLowerCase() || '';
-      const groupMemo = card.querySelector<HTMLElement>('.grid-in-content > div:last-child')?.textContent?.trim().toLowerCase() || '';
+      const groupIdElement = card.querySelector<HTMLElement>('.grid-in-content > div:first-child');
+      const groupNameElement = card.querySelector<HTMLElement>('.grid-in-content > div:nth-child(2)');
+      const groupMemoElement = card.querySelector<HTMLElement>('.grid-in-content > div:last-child');
       
-      // 如果搜索框为空，显示所有卡片
-      // 否则检查标签、群名、群号或群简介是否包含搜索文本
-      const shouldShow = searchText === '' || 
-        cardLabels.some(label => label.includes(searchText)) ||
+      const groupId = groupIdElement?.textContent?.trim().toLowerCase() || '';
+      const groupName = groupNameElement?.textContent?.trim().toLowerCase() || '';
+      const groupMemo = groupMemoElement?.textContent?.trim().toLowerCase() || '';
+      
+      // 如果搜索框为空，显示所有卡片并移除高亮
+      if (searchText === '') {
+        if (groupIdElement) groupIdElement.innerHTML = groupId;
+        if (groupNameElement) groupNameElement.innerHTML = groupName;
+        if (groupMemoElement) groupMemoElement.innerHTML = groupMemo;
+        card.style.display = '';
+        hasVisibleCards = true;
+        return;
+      }
+      
+      // 检查标签、群名、群号或群简介是否包含搜索文本
+      const shouldShow = cardLabels.some(label => label.includes(searchText)) ||
         groupName.includes(searchText) ||
         groupId.includes(searchText) ||
         groupMemo.includes(searchText);
       
-      const cardElement = card as HTMLElement;
-      cardElement.style.display = shouldShow ? '' : 'none';
-      
-      if (shouldShow) hasVisibleCards = true;
+      // 如果卡片应该显示，添加高亮
+      if (shouldShow) {
+        if (groupIdElement) groupIdElement.innerHTML = highlightText(groupIdElement.textContent || '', searchText);
+        if (groupNameElement) groupNameElement.innerHTML = highlightText(groupNameElement.textContent || '', searchText);
+        if (groupMemoElement) groupMemoElement.innerHTML = highlightText(groupMemoElement.textContent || '', searchText);
+        card.style.display = '';
+        hasVisibleCards = true;
+      } else {
+        card.style.display = 'none';
+      }
       
       // 获取卡片所属的标题元素
       const sectionId = card.closest('section')?.id;
