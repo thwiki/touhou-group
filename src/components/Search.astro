@@ -48,6 +48,12 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
   const groupCards = document.querySelectorAll<HTMLElement>('[id^="group-"]');
   const noResults = document.getElementById('no-results') as HTMLElement;
   
+  // 从 URL 获取搜索参数
+  function getSearchParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('q') || '';
+  }
+
   // 清空搜索并显示所有内容
   function clearSearch() {
     searchInput.value = '';
@@ -57,6 +63,15 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
   // 监听搜索输入
   searchInput.addEventListener('input', () => {
     const searchText = searchInput.value.trim().toLowerCase();
+    
+    // 更新 URL，但不触发页面刷新
+    const url = new URL(window.location.href);
+    if (searchText) {
+      url.searchParams.set('q', searchText);
+    } else {
+      url.searchParams.delete('q');
+    }
+    window.history.replaceState({}, '', url.toString());
     
     // 创建一个 Map 来跟踪每个标题下是否有可见的卡片
     const sectionVisibility = new Map<string, boolean>();
@@ -173,5 +188,14 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
     link.addEventListener('click', () => {
       clearSearch();
     });
+  });
+
+  // 页面加载时检查 URL 参数并执行搜索
+  window.addEventListener('load', () => {
+    const searchParam = getSearchParam();
+    if (searchParam) {
+      searchInput.value = searchParam;
+      searchInput.dispatchEvent(new Event('input'));
+    }
   });
 </script>
