@@ -72,7 +72,9 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
       const shouldShow = searchText === '' || 
         cardLabels.some(label => label.includes(searchText));
       
-      card.style.display = shouldShow ? '' : 'none';
+      const cardElement = card as HTMLElement;
+      cardElement.style.display = shouldShow ? '' : 'none';
+      
       if (shouldShow) hasVisibleCards = true;
       
       // 获取卡片所属的标题元素
@@ -91,7 +93,22 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
         return;
       }
       const hasVisibleCards = sectionVisibility.get(sectionId) || false;
-      section.style.display = hasVisibleCards ? '' : 'none';
+      // 只隐藏section本身，不影响其内部元素的显示
+      const sectionElement = section as HTMLElement;
+      sectionElement.style.display = hasVisibleCards ? '' : 'none';
+      
+      // 确保section内的所有卡片内容可见
+      if (hasVisibleCards) {
+        section.querySelectorAll('[id^="group-"]').forEach(card => {
+          const cardElement = card as HTMLElement;
+          if (cardElement.style.display !== 'none') {
+            // 确保卡片内的所有内容可见
+            cardElement.querySelectorAll('div').forEach(div => {
+              (div as HTMLElement).style.display = '';
+            });
+          }
+        });
+      }
     });
 
     // 显示或隐藏无结果提示
