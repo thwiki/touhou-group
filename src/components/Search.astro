@@ -136,17 +136,39 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
         sectionVisibility.set(sectionId, sectionVisibility.get(sectionId) || shouldShow);
       }
     });
-    
-    // 更新标题的显示状态
-    document.querySelectorAll('section').forEach((section) => {
-      const sectionId = section.id;
-      // 如果是标题部分（包含地图）或者第一个子节点是 H2 标签，始终显示
-      if (sectionId === 'title-section' || section.firstElementChild?.tagName === 'H2') {
-        section.style.display = '';
-        return;
-      }
 
-    });
+    const sections = document.querySelectorAll('section');
+    // 遍历所有section，检查相邻section之间的可见性
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      // 一级标题和地图
+      if (section.id === 'title-section') {
+        section.style.display = '';
+        continue;
+      }
+      // 二级标题
+      if (section.firstElementChild?.tagName === 'H2') {
+        if (sectionVisibility.get(section.id)){
+          // 二级标题自带卡片
+          section.style.display = '';
+        } else {
+          // 二级标题仅标题，找下属三级标题有无卡片
+          if (i < sections.length-1){
+            const nextSection = sections[i+1]
+            if (nextSection.firstElementChild?.tagName === 'H3' && sectionVisibility.get(nextSection.id)) {
+              section.style.display = '';
+              continue;
+            }
+          }
+        }
+      }
+      // 三级标题
+      if (sectionVisibility.get(section.id)){
+        section.style.display = '';
+      } else {
+        section.style.display = 'none';
+      }
+    }
 
     // 显示或隐藏无结果提示
     if (searchText !== '' && !hasVisibleCards) {
