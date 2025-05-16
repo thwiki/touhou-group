@@ -80,7 +80,9 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
     // 高亮文本的函数
     function highlightText(text: string, searchText: string): string {
       if (!searchText) return text;
-      const regex = new RegExp(`(${searchText})`, 'gi');
+      // 转义正则特殊字符
+      const escapedSearchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedSearchText})`, 'gi');
       return text.replace(regex, '<mark class="bg-amber-200">$1</mark>');
     }
     
