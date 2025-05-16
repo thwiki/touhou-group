@@ -90,6 +90,11 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
         if (groupMemoElement) groupMemoElement.innerHTML = groupMemo;
         card.style.display = '';
         hasVisibleCards = true;
+        // 获取卡片所属的标题元素
+        const sectionId = card.closest('section')?.id;
+        if (sectionId) {
+          sectionVisibility.set(sectionId, true);
+        }
         return;
       }
       
@@ -120,8 +125,8 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
     // 更新标题的显示状态
     document.querySelectorAll('section').forEach((section) => {
       const sectionId = section.id;
-      // 如果是标题部分（包含地图），始终显示
-      if (sectionId === 'title-section') {
+      // 如果是标题部分（包含地图）或者第一个子节点是 H2 标签，始终显示
+      if (sectionId === 'title-section' || section.firstElementChild?.tagName === 'H2') {
         section.style.display = '';
         return;
       }
@@ -154,8 +159,12 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
 
   // 监听侧边栏链接点击
   document.querySelectorAll('#sidebar a').forEach(link => {
-    link.addEventListener('click', () => {
-      clearSearch();
+    link.addEventListener('click', (e) => {
+      const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href');
+      // 如果不是锚点链接，则清空搜索
+      if (href && !href.startsWith('#')) {
+        clearSearch();
+      }
     });
   });
 
