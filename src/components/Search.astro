@@ -13,6 +13,12 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
     });
   });
 });
+
+export type Props = {
+  title?: string;
+};
+
+const { title = '东方相关 QQ 群组列表' } = Astro.props;
 ---
 
 <div class="mb-8 mt-8 flex justify-center">
@@ -21,7 +27,7 @@ listEntries.forEach((entry: CollectionEntry<'lists'>) => {
       type="text"
       id="search-input"
       class="w-full rounded-full border border-gray-200 bg-gray-50 px-6 py-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-      placeholder="搜索标签/群号/群名/群简介..."
+      placeholder={`在${title}中搜索标签/群号/群名/群简介...`}
     />
     <svg
       xmlns="http://www.w3.org/2000/svg"

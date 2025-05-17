@@ -25,7 +25,7 @@ const { sections } = entry.data;
 		<H1 id="_top">{entry.data.title}</H1>
 		<Map {sections} />
 	</section>
-	<Search />
+	<Search title={entry.data.title} />
 	{
 		sections.map((section) => {
 			const Heading = section.depth === 2 ? H2 : H3;
