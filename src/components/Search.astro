@@ -7,225 +7,329 @@ const listEntries = (await getCollection('lists')).sort((a, b) => a.data.id - b.
 // 获取所有唯一的标签
 const allLabels = new Set<string>();
 listEntries.forEach((entry: CollectionEntry<'lists'>) => {
-  entry.data.sections.forEach((section) => {
-    section.groups.forEach((group) => {
-      group.labels.forEach((label: string) => allLabels.add(label));
-    });
-  });
+	entry.data.sections.forEach((section) => {
+		section.groups.forEach((group) => {
+			group.labels.forEach((label: string) => allLabels.add(label));
+		});
+	});
 });
 
 export type Props = {
-  title?: string;
+	title?: string;
 };
 
 const { title = '东方相关 QQ 群组列表' } = Astro.props;
 ---
 
 <div class="mb-8 mt-8 flex justify-center">
-  <div class="w-full max-w-md relative">
-    <input
-      type="text"
-      id="search-input"
-      class="w-full rounded-full border border-gray-200 bg-gray-50 px-6 py-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-      placeholder={`在${title}中搜索标签/群号/群名/群简介...`}
-    />
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-      />
-    </svg>
-  </div>
+	<div class="relative w-full max-w-md">
+		<input
+			type="text"
+			id="search-input"
+			class="w-full rounded-full border border-gray-200 bg-gray-50 px-6 py-3 text-sm shadow-sm transition-all duration-300 placeholder:text-gray-400 focus:-translate-y-0.5 focus:border-amber-500 focus:bg-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+			placeholder={`在${title}中搜索标签/群号/群名/群简介...`}
+		/>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke-width="1.5"
+			stroke="currentColor"
+			class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path>
+		</svg>
+	</div>
 </div>
-<div id="no-results" class="mt-4 hidden text-center text-gray-500">
-  没有找到匹配的群组
+<div
+	id="no-results"
+	class="search-empty-state mt-4 translate-y-2 text-center text-gray-500 opacity-0"
+	hidden
+>
+	没有找到匹配的群组
 </div>
 
 <script>
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const noResults = document.getElementById('no-results') as HTMLElement;
-  const sections = document.querySelectorAll<HTMLElement>('section');
+	const FILTER_OUT_CLASS = 'is-filtering-out';
+	const FILTER_VISIBLE_CLASS = 'is-visible';
+	const FILTER_DELAY = 170;
+	const globalScope = window as typeof window & {
+		__touhouSearchListenersBound?: boolean;
+	};
 
-  // 用 DOM API 渲染高亮，完全避免 innerHTML / XSS 风险
-  function applyHighlight(element: HTMLElement, text: string, query: string) {
-    element.replaceChildren();
-    if (!query) {
-      element.appendChild(document.createTextNode(text));
-      return;
-    }
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escaped, 'gi');
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        element.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
-      }
-      const mark = document.createElement('mark');
-      mark.className = 'bg-amber-200';
-      mark.appendChild(document.createTextNode(match[0]));
-      element.appendChild(mark);
-      lastIndex = regex.lastIndex;
-    }
-    if (lastIndex < text.length) {
-      element.appendChild(document.createTextNode(text.slice(lastIndex)));
-    }
-  }
+	function applyHighlight(element: HTMLElement, text: string, query: string) {
+		element.replaceChildren();
+		if (!query) {
+			element.appendChild(document.createTextNode(text));
+			return;
+		}
+		const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const regex = new RegExp(escaped, 'gi');
+		let lastIndex = 0;
+		let match: RegExpExecArray | null;
+		while ((match = regex.exec(text)) !== null) {
+			if (match.index > lastIndex) {
+				element.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+			}
+			const mark = document.createElement('mark');
+			mark.className = 'rounded bg-amber-200/80 px-0.5 text-inherit';
+			mark.appendChild(document.createTextNode(match[0]));
+			element.appendChild(mark);
+			lastIndex = regex.lastIndex;
+		}
+		if (lastIndex < text.length) {
+			element.appendChild(document.createTextNode(text.slice(lastIndex)));
+		}
+	}
 
-  // 预缓存所有卡片的 DOM 引用和原始文本，避免每次搜索时重复查询和读取 DOM
-  const cardCache = Array.from(
-    document.querySelectorAll<HTMLElement>('.grid-areas-card[id^="group-"]')
-  ).map((card) => {
-    const labelElements = Array.from(card.querySelectorAll<HTMLElement>('.grid-in-labels > div'));
-    const groupIdElement = card.querySelector<HTMLElement>('.grid-in-content > div:first-child');
-    const groupNameElement = card.querySelector<HTMLElement>('.grid-in-content > div:nth-child(2)');
-    const groupMemoElement = card.querySelector<HTMLElement>('.grid-in-content > div:last-child');
-    const groupIdText = groupIdElement?.textContent?.trim() ?? '';
-    const groupNameText = groupNameElement?.textContent?.trim() ?? '';
-    const groupMemoText = groupMemoElement?.textContent?.trim() ?? '';
-    return {
-      card,
-      groupIdElement,
-      groupNameElement,
-      groupMemoElement,
-      sectionId: card.closest('section')?.id,
-      // 小写文本用于匹配
-      labels: labelElements.map(el => el.textContent?.trim().toLowerCase() ?? '').filter(Boolean),
-      groupIdLower: groupIdText.toLowerCase(),
-      groupNameLower: groupNameText.toLowerCase(),
-      groupMemoLower: groupMemoText.toLowerCase(),
-      // 原始文本用于高亮渲染和清空还原
-      groupIdText,
-      groupNameText,
-      groupMemoText,
-    };
-  });
+	function setAnimatedVisibility(
+		element: HTMLElement,
+		shouldShow: boolean,
+		timerKey: 'hideTimerId' | 'sectionHideTimerId'
+	) {
+		const scheduledTimer = element.dataset[timerKey];
+		if (scheduledTimer) {
+			window.clearTimeout(Number(scheduledTimer));
+			delete element.dataset[timerKey];
+		}
 
-  // 复用同一个 Map，避免每次搜索都重新分配
-  const sectionVisibility = new Map<string, boolean>();
+		if (shouldShow) {
+			element.hidden = false;
+			requestAnimationFrame(() => {
+				element.classList.remove(FILTER_OUT_CLASS);
+			});
+			return;
+		}
 
-  function performSearch(searchText: string) {
-    // 更新 URL，但不触发页面刷新
-    const url = new URL(window.location.href);
-    if (searchText) {
-      url.searchParams.set('q', searchText);
-    } else {
-      url.searchParams.delete('q');
-    }
-    window.history.replaceState({}, '', url.toString());
+		element.classList.add(FILTER_OUT_CLASS);
+		element.dataset[timerKey] = String(
+			window.setTimeout(() => {
+				element.hidden = true;
+				delete element.dataset[timerKey];
+			}, FILTER_DELAY)
+		);
+	}
 
-    sectionVisibility.clear();
-    let hasVisibleCards = false;
+	function initSearch() {
+		const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+		const noResults = document.getElementById('no-results') as HTMLElement | null;
 
-    for (const { card, groupIdElement, groupNameElement, groupMemoElement, sectionId,
-                 labels, groupIdLower, groupNameLower, groupMemoLower,
-                 groupIdText, groupNameText, groupMemoText } of cardCache) {
-      if (searchText === '') {
-        if (groupIdElement) groupIdElement.textContent = groupIdText;
-        if (groupNameElement) groupNameElement.textContent = groupNameText;
-        if (groupMemoElement) groupMemoElement.textContent = groupMemoText;
-        card.style.display = '';
-        hasVisibleCards = true;
-        if (sectionId) sectionVisibility.set(sectionId, true);
-        continue;
-      }
+		if (!searchInput || !noResults || searchInput.dataset.searchReady === 'true') {
+			return;
+		}
 
-      const shouldShow =
-        labels.some(l => l.includes(searchText)) ||
-        groupNameLower.includes(searchText) ||
-        groupIdLower.includes(searchText) ||
-        groupMemoLower.includes(searchText);
+		const searchField = searchInput;
+		const noResultsElement = noResults;
 
-      if (shouldShow) {
-        if (groupIdElement) applyHighlight(groupIdElement, groupIdText, searchText);
-        if (groupNameElement) applyHighlight(groupNameElement, groupNameText, searchText);
-        if (groupMemoElement) applyHighlight(groupMemoElement, groupMemoText, searchText);
-        card.style.display = '';
-        hasVisibleCards = true;
-      } else {
-        card.style.display = 'none';
-      }
+		searchField.dataset.searchReady = 'true';
 
-      if (sectionId) {
-        sectionVisibility.set(sectionId, sectionVisibility.get(sectionId) || shouldShow);
-      }
-    }
+		const sections = Array.from(document.querySelectorAll<HTMLElement>('section'));
+		const sectionVisibility = new Map<string, boolean>();
+		const cardCache = Array.from(document.querySelectorAll<HTMLElement>('[data-group-card]')).map(
+			(card) => {
+				const labelElements = Array.from(
+					card.querySelectorAll<HTMLElement>('[data-group-role="labels"] > div')
+				);
+				const groupIdElement = card.querySelector<HTMLElement>('[data-group-role="id"]');
+				const groupNameElement = card.querySelector<HTMLElement>('[data-group-role="name"]');
+				const groupMemoElement = card.querySelector<HTMLElement>('[data-group-role="memo"]');
+				const groupIdText = groupIdElement?.textContent?.trim() ?? '';
+				const groupNameText = groupNameElement?.textContent?.trim() ?? '';
+				const groupMemoText = groupMemoElement?.textContent?.trim() ?? '';
 
-    // 遍历所有 section，根据可见性决定是否显示
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-      if (section.id === 'title-section') {
-        section.style.display = '';
-        continue;
-      }
-      const isVisible = sectionVisibility.get(section.id) ?? false;
-      // 二级标题本身无卡片时，需检查紧随的三级标题是否有可见卡片
-      if (!isVisible && section.firstElementChild?.tagName === 'H2' && i < sections.length - 1) {
-        const next = sections[i + 1];
-        if (next.firstElementChild?.tagName === 'H3' && (sectionVisibility.get(next.id) ?? false)) {
-          section.style.display = '';
-          continue;
-        }
-      }
-      section.style.display = isVisible ? '' : 'none';
-    }
+				card.hidden = false;
+				card.classList.remove(FILTER_OUT_CLASS);
 
-    if (searchText !== '' && !hasVisibleCards) {
-      noResults.classList.remove('hidden');
-    } else {
-      noResults.classList.add('hidden');
-    }
-  }
+				return {
+					card,
+					groupIdElement,
+					groupNameElement,
+					groupMemoElement,
+					sectionId: card.closest('section')?.id,
+					labels: labelElements
+						.map((element) => element.textContent?.trim().toLowerCase() ?? '')
+						.filter(Boolean),
+					groupIdLower: groupIdText.toLowerCase(),
+					groupNameLower: groupNameText.toLowerCase(),
+					groupMemoLower: groupMemoText.toLowerCase(),
+					groupIdText,
+					groupNameText,
+					groupMemoText
+				};
+			}
+		);
 
-  function getSearchParam() {
-    return new URLSearchParams(window.location.search).get('q') ?? '';
-  }
+		for (const section of sections) {
+			section.hidden = false;
+			section.classList.remove(FILTER_OUT_CLASS);
+		}
 
-  function clearSearch() {
-    searchInput.value = '';
-    performSearch('');
-  }
+		function toggleNoResults(visible: boolean) {
+			if (visible) {
+				noResultsElement.hidden = false;
+				requestAnimationFrame(() => {
+					noResultsElement.classList.add(FILTER_VISIBLE_CLASS);
+				});
+				return;
+			}
 
-  // 防抖：150ms 内连续触发只执行最后一次，避免高频输入时每次击键都重渲染
-  let debounceTimer: ReturnType<typeof setTimeout>;
-  searchInput.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      performSearch(searchInput.value.trim().toLowerCase());
-    }, 150);
-  });
+			noResultsElement.classList.remove(FILTER_VISIBLE_CLASS);
+			window.setTimeout(() => {
+				if (!noResultsElement.classList.contains(FILTER_VISIBLE_CLASS)) {
+					noResultsElement.hidden = true;
+				}
+			}, FILTER_DELAY);
+		}
 
-  // 监听侧边栏链接点击
-  document.querySelectorAll('#sidebar a').forEach(link => {
-    link.addEventListener('click', (e) => {
-      const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href');
-      if (href && !href.startsWith('#')) {
-        clearSearch();
-      }
-    });
-  });
+		function performSearch(searchText: string) {
+			const url = new URL(window.location.href);
+			if (searchText) {
+				url.searchParams.set('q', searchText);
+			} else {
+				url.searchParams.delete('q');
+			}
+			window.history.replaceState({}, '', url.toString());
 
-  // 监听地图区域点击
-  document.querySelectorAll('svg a').forEach(link => {
-    link.addEventListener('click', () => {
-      clearSearch();
-    });
-  });
+			sectionVisibility.clear();
+			let hasVisibleCards = false;
 
-  // 页面加载时检查 URL 参数并执行搜索
-  window.addEventListener('load', () => {
-    const searchParam = getSearchParam();
-    if (searchParam) {
-      searchInput.value = searchParam;
-      performSearch(searchParam);
-    }
-  });
+			for (const {
+				card,
+				groupIdElement,
+				groupNameElement,
+				groupMemoElement,
+				sectionId,
+				labels,
+				groupIdLower,
+				groupNameLower,
+				groupMemoLower,
+				groupIdText,
+				groupNameText,
+				groupMemoText
+			} of cardCache) {
+				if (searchText === '') {
+					if (groupIdElement) {
+						groupIdElement.textContent = groupIdText;
+					}
+					if (groupNameElement) {
+						groupNameElement.textContent = groupNameText;
+					}
+					if (groupMemoElement) {
+						groupMemoElement.textContent = groupMemoText;
+					}
+					setAnimatedVisibility(card, true, 'hideTimerId');
+					hasVisibleCards = true;
+					if (sectionId) {
+						sectionVisibility.set(sectionId, true);
+					}
+					continue;
+				}
+
+				const shouldShow =
+					labels.some((label) => label.includes(searchText)) ||
+					groupNameLower.includes(searchText) ||
+					groupIdLower.includes(searchText) ||
+					groupMemoLower.includes(searchText);
+
+				if (shouldShow) {
+					if (groupIdElement) {
+						applyHighlight(groupIdElement, groupIdText, searchText);
+					}
+					if (groupNameElement) {
+						applyHighlight(groupNameElement, groupNameText, searchText);
+					}
+					if (groupMemoElement) {
+						applyHighlight(groupMemoElement, groupMemoText, searchText);
+					}
+					setAnimatedVisibility(card, true, 'hideTimerId');
+					hasVisibleCards = true;
+				} else {
+					setAnimatedVisibility(card, false, 'hideTimerId');
+				}
+
+				if (sectionId) {
+					sectionVisibility.set(sectionId, sectionVisibility.get(sectionId) || shouldShow);
+				}
+			}
+
+			for (let index = 0; index < sections.length; index++) {
+				const section = sections[index];
+				if (section.id === 'title-section') {
+					setAnimatedVisibility(section, true, 'sectionHideTimerId');
+					continue;
+				}
+
+				let isVisible = sectionVisibility.get(section.id) ?? false;
+				if (
+					!isVisible &&
+					section.firstElementChild?.tagName === 'H2' &&
+					index < sections.length - 1
+				) {
+					const nextSection = sections[index + 1];
+					if (
+						nextSection.firstElementChild?.tagName === 'H3' &&
+						(sectionVisibility.get(nextSection.id) ?? false)
+					) {
+						isVisible = true;
+					}
+				}
+
+				setAnimatedVisibility(section, isVisible, 'sectionHideTimerId');
+			}
+
+			toggleNoResults(searchText !== '' && !hasVisibleCards);
+		}
+
+		function getSearchParam() {
+			return new URLSearchParams(window.location.search).get('q') ?? '';
+		}
+
+		function clearSearch() {
+			searchField.value = '';
+			performSearch('');
+		}
+
+		let debounceTimer = 0;
+		searchField.addEventListener('input', () => {
+			window.clearTimeout(debounceTimer);
+			debounceTimer = window.setTimeout(() => {
+				performSearch(searchField.value.trim().toLowerCase());
+			}, 150);
+		});
+
+		document.querySelectorAll('#sidebar a').forEach((link) => {
+			link.addEventListener('click', (event) => {
+				const href = (event.currentTarget as HTMLAnchorElement).getAttribute('href');
+				if (href && !href.startsWith('#')) {
+					clearSearch();
+				}
+			});
+		});
+
+		document.querySelectorAll('svg a').forEach((link) => {
+			link.addEventListener('click', () => {
+				clearSearch();
+			});
+		});
+
+		const searchParam = getSearchParam();
+		if (searchParam) {
+			searchField.value = searchParam;
+			performSearch(searchParam);
+			return;
+		}
+
+		performSearch('');
+	}
+
+	if (!globalScope.__touhouSearchListenersBound) {
+		document.addEventListener('astro:page-load', initSearch);
+		window.addEventListener('load', initSearch, { once: true });
+		globalScope.__touhouSearchListenersBound = true;
+	}
+
+	initSearch();
 </script>

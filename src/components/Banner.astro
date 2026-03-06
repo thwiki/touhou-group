@@ -10,16 +10,22 @@ const host = Astro.site?.host ?? 'touhou.group';
 ---
 
 <a
-	class="flex flex-wrap items-center gap-4 rounded-lg border border-gray-200 p-4 text-3xl font-medium text-gray-800 shadow-sm outline-none ring-amber-500 transition-colors hover:bg-gray-100 focus:ring-2 active:bg-gray-200"
+	class="interactive-card group flex flex-wrap items-center gap-4 rounded-2xl border border-gray-200 bg-white/80 p-4 text-3xl font-medium text-gray-800 shadow-sm outline-none ring-amber-500 ring-offset-2 transition-all duration-300 hover:-translate-y-1 hover:border-amber-300 hover:bg-white hover:shadow-xl focus:-translate-y-1 focus:border-amber-300 focus:bg-white focus:ring-2 active:translate-y-0 active:shadow-md"
 	href={`/${slug}/`}
 >
 	<div>
 		<slot />
-		{alias && (
-			<span class="block font-mono text-xs font-normal text-gray-400 mt-0.5">
-				{host}/{alias}
-			</span>
-		)}
+		{
+			alias && (
+				<span class="mt-0.5 block font-mono text-xs font-normal text-gray-400">
+					{host}/{alias}
+				</span>
+			)
+		}
 	</div>
-	<div class="ml-auto shrink-0">{count} 个</div>
+	<div
+		class="ml-auto shrink-0 text-2xl transition-transform duration-300 group-hover:translate-x-1"
+	>
+		{count} 个
+	</div>
 </a>

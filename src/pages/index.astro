@@ -34,7 +34,7 @@ export const listEntries = (await getCollection('lists')).sort((a, b) => a.data.
 		</li>
 	</UL>
 
-	<div class="mt-4 max-w-xl space-y-4">
+	<div class="stagger-list mt-4 max-w-xl space-y-4">
 		{
 			listEntries.map((entry) => (
 				<Banner slug={entry.data.title} count={entry.data.count} alias={titleAliases[entry.data.title]}>

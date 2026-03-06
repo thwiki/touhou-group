@@ -1,5 +1,6 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import { ViewTransitions } from 'astro:transitions';
 import Footer from '../components/Footer.astro';
 import Main from '../components/Main.astro';
 import Sidebar from '../components/Sidebar.astro';
@@ -35,10 +36,11 @@ const { headings, frontmatter } = Astro.props;
 		<title>
 			{frontmatter?.title ? frontmatter.title + ' - 东方相关 QQ 群组列表' : '东方相关 QQ 群组列表'}
 		</title>
+		<ViewTransitions />
 	</head>
 	<body>
 		<div
-			class="grid size-full min-h-screen grid-cols-layout-sm grid-rows-layout text-neutral-950 transition-all grid-areas-layout sm:grid-cols-layout-md md:grid-cols-layout-lg"
+			class="page-shell grid size-full min-h-screen grid-cols-layout-sm grid-rows-layout text-neutral-950 transition-all duration-500 grid-areas-layout sm:grid-cols-layout-md md:grid-cols-layout-lg"
 		>
 			<Sidebar headings={headings ?? []} title={frontmatter?.title ?? ''} />
 			<Main>
@@ -46,23 +48,222 @@ const { headings, frontmatter } = Astro.props;
 			</Main>
 			<Footer />
 		</div>
-	</body>
+	</body><style is:global>
+		:root {
+			--motion-duration-fast: 180ms;
+			--motion-duration-base: 280ms;
+			--motion-duration-slow: 460ms;
+			--motion-ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
+			--motion-ease-standard: cubic-bezier(0.33, 1, 0.68, 1);
+			--surface-glow: radial-gradient(circle at top, rgb(251 191 36 / 0.16), transparent 34%);
+		}
+
+		html,
+		body {
+			@apply w-full;
+			scrollbar-gutter: auto;
+			-webkit-tap-highlight-color: transparent;
+		}
+
+		body {
+			@apply bg-white text-neutral-950;
+			background-image: var(--surface-glow), linear-gradient(180deg, #fffdf8 0%, #ffffff 16rem);
+			scroll-behavior: smooth;
+		}
+
+		* {
+			@apply min-w-0;
+		}
+
+		[hidden] {
+			display: none !important;
+		}
+
+		.page-shell {
+			isolation: isolate;
+		}
+
+		.page-content {
+			animation: content-rise var(--motion-duration-slow) var(--motion-ease-emphasis);
+		}
+
+		.filter-card,
+		.filter-section,
+		.interactive-card,
+		.floating-action {
+			will-change: transform, opacity;
+		}
+
+		.stagger-list > * {
+			animation: stagger-rise var(--motion-duration-slow) var(--motion-ease-emphasis) both;
+			animation-delay: calc(var(--stagger-order, 0) * 60ms + 80ms);
+		}
+
+		.stagger-list > :nth-child(12n + 1) {
+			--stagger-order: 0;
+		}
+
+		.stagger-list > :nth-child(12n + 2) {
+			--stagger-order: 1;
+		}
+
+		.stagger-list > :nth-child(12n + 3) {
+			--stagger-order: 2;
+		}
+
+		.stagger-list > :nth-child(12n + 4) {
+			--stagger-order: 3;
+		}
+
+		.stagger-list > :nth-child(12n + 5) {
+			--stagger-order: 4;
+		}
+
+		.stagger-list > :nth-child(12n + 6) {
+			--stagger-order: 5;
+		}
+
+		.stagger-list > :nth-child(12n + 7) {
+			--stagger-order: 6;
+		}
+
+		.stagger-list > :nth-child(12n + 8) {
+			--stagger-order: 7;
+		}
+
+		.stagger-list > :nth-child(12n + 9) {
+			--stagger-order: 8;
+		}
+
+		.stagger-list > :nth-child(12n + 10) {
+			--stagger-order: 9;
+		}
+
+		.stagger-list > :nth-child(12n + 11) {
+			--stagger-order: 10;
+		}
+
+		.stagger-list > :nth-child(12n + 12) {
+			--stagger-order: 11;
+		}
+
+		.filter-card {
+			transition:
+				opacity 200ms var(--motion-ease-standard),
+				transform 200ms var(--motion-ease-standard),
+				filter 200ms var(--motion-ease-standard),
+				box-shadow 200ms var(--motion-ease-standard),
+				border-color var(--motion-duration-fast) ease,
+				background-color var(--motion-duration-fast) ease;
+		}
+
+		.filter-card.is-filtering-out {
+			opacity: 0;
+			transform: translateY(12px) scale(0.98);
+			filter: saturate(0.88) blur(0.6px);
+			pointer-events: none;
+		}
+
+		.filter-section {
+			transition:
+				opacity 200ms var(--motion-ease-standard),
+				transform 200ms var(--motion-ease-standard);
+		}
+
+		.filter-section.is-filtering-out {
+			opacity: 0;
+			transform: translateY(8px);
+			pointer-events: none;
+		}
+
+		.search-empty-state {
+			transition:
+				opacity var(--motion-duration-base) var(--motion-ease-standard),
+				transform var(--motion-duration-base) var(--motion-ease-standard);
+		}
+
+		.search-empty-state.is-visible {
+			opacity: 1;
+			transform: translateY(0);
+		}
+
+		::view-transition-old(root),
+		::view-transition-new(root) {
+			animation-duration: var(--motion-duration-slow);
+			animation-timing-function: var(--motion-ease-emphasis);
+			transform-origin: top center;
+		}
+
+		::view-transition-old(root) {
+			animation-name: page-fade-out;
+		}
+
+		::view-transition-new(root) {
+			animation-name: page-fade-in;
+		}
+
+		@keyframes page-fade-in {
+			from {
+				opacity: 0;
+				transform: translateY(18px) scale(0.985);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
+		}
+
+		@keyframes page-fade-out {
+			from {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
+
+			to {
+				opacity: 0;
+				transform: translateY(-10px) scale(0.992);
+			}
+		}
+
+		@keyframes content-rise {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		@keyframes stagger-rise {
+			from {
+				opacity: 0;
+				transform: translateY(22px) scale(0.985);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			html:focus-within {
+				scroll-behavior: auto;
+			}
+
+			*,
+			*::before,
+			*::after,
+			::view-transition-old(root),
+			::view-transition-new(root) {
+				animation-duration: 1ms !important;
+				animation-iteration-count: 1 !important;
+				transition-duration: 1ms !important;
+			}
+		}
+	</style>
 </html>
-
-<style is:global>
-	html,
-	body {
-		@apply w-full;
-		scrollbar-gutter: auto;
-		-webkit-tap-highlight-color: transparent;
-	}
-
-	body {
-		@apply bg-white;
-		scroll-behavior: smooth;
-	}
-
-	* {
-		@apply min-w-0;
-	}
-</style>

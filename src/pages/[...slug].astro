@@ -34,11 +34,11 @@ const alias = titleAliases[entry.data.title];
 		sections.map((section) => {
 			const Heading = section.depth === 2 ? H2 : H3;
 			return (
-				<section id={section.slug}>
+				<section id={section.slug} class="filter-section">
 					<Heading id={section.slug}>
 						<a href={`#${section.slug}`}>{section.text}</a>
 					</Heading>
-					<div class="grid grid-cols-cards gap-4">
+					<div class="stagger-list grid grid-cols-cards gap-4">
 						{section.groups.map((group) => (
 							<Group {group} />
 						))}

@@ -10,17 +10,18 @@ const { group } = Astro.props;
 ---
 
 <div
-	class="grid grid-cols-card grid-rows-card gap-y-2 rounded-lg border border-gray-200 bg-gray-20 p-4 shadow-sm transition-colors grid-areas-card hover:bg-gray-100"
+	class="interactive-card filter-card grid grid-cols-card grid-rows-card gap-y-2 rounded-2xl border border-gray-200/90 bg-gray-20 p-4 shadow-sm transition-all duration-300 grid-areas-card focus-within:-translate-y-1 focus-within:border-amber-300 focus-within:bg-white focus-within:shadow-lg hover:-translate-y-1 hover:border-amber-300 hover:bg-white hover:shadow-lg"
 	id={`group-${group.id}`}
 	aria-labelledby={`group-${group.id}-name`}
 	aria-describedby={group.memo !== '' ? `group-${group.id}-memo` : undefined}
 	tabindex="0"
+	data-group-card
 >
-	<div class="flex flex-wrap gap-x-2 gap-y-1 grid-in-labels">
+	<div class="flex flex-wrap gap-x-2 gap-y-1 grid-in-labels" data-group-role="labels">
 		{
 			group.labels.map((label) => (
 				<div
-					class={`overflow-hidden text-ellipsis whitespace-nowrap rounded-full ${group.labels.length > group.labelsLength ? 'bg-gray-400' : 'bg-amber-500'} px-2.5 py-0.5 text-xs font-semibold text-white transition-colors first:bg-blue-600 ${group.labels.length > group.labelsLength && group.labelsLength > 1 ?'last:bg-amber-500' : ''}`}
+					class={`overflow-hidden text-ellipsis whitespace-nowrap rounded-full ${group.labels.length > group.labelsLength ? 'bg-gray-400' : 'bg-amber-500'} px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 first:bg-blue-600 hover:-translate-y-0.5 hover:shadow ${group.labels.length > group.labelsLength && group.labelsLength > 1 ? 'last:bg-amber-500' : ''}`}
 					title={label}
 				>
 					{label}
@@ -31,24 +32,35 @@ const { group } = Astro.props;
 	{
 		group.image ? (
 			<a
-				class="mr-2 flex w-20 flex-col items-center outline-none ring-blue-300 ring-offset-1 grid-in-image focus:ring-2 active:bg-blue-500"
+				class="mr-2 flex w-20 flex-col items-center overflow-hidden rounded-xl outline-none ring-amber-400 ring-offset-2 transition-all duration-300 grid-in-image hover:scale-[1.03] focus:ring-2 active:scale-[0.98]"
 				href={group.link}
 				target="_blank"
 				rel="noopener noreferrer"
 				aria-label="加入群聊"
 			>
-				<Picture class="rounded-md" src={group.image} alt={group.name} loading="lazy" />
+				<Picture
+					class="rounded-xl transition-transform duration-500 hover:scale-105"
+					src={group.image}
+					alt={group.name}
+					loading="lazy"
+				/>
 			</a>
 		) : (
 			<div />
 		)
 	}
 	<div class="flex-1 grid-in-content">
-		<div class="text-lg font-bold">{group.id}</div>
-		<div class="line-clamp-2 text-gray-700" id={`group-${group.id}-name`}>{group.name}</div>
+		<div class="text-lg font-bold text-gray-950" data-group-role="id">{group.id}</div>
+		<div class="line-clamp-2 text-gray-700" id={`group-${group.id}-name`} data-group-role="name">
+			{group.name}
+		</div>
 		{
 			group.memo !== '' && (
-				<div class="mt-2 text-xs text-gray-500" id={`group-${group.id}-memo`}>
+				<div
+					class="mt-2 text-xs leading-5 text-gray-500"
+					id={`group-${group.id}-memo`}
+					data-group-role="memo"
+				>
 					{group.memo}
 				</div>
 			)
