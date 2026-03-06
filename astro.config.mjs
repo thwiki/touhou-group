@@ -11,8 +11,8 @@ export default defineConfig({
 		'/school': '/学校东方群',
 		'/regional': '/地区性东方群',
 		'/functional': '/功能性公开群',
-		'/events': '/活动官方群',
-		'/organizations': '/组织实体官方群',
+		'/event': '/活动官方群',
+		'/organization': '/组织实体官方群',
 		'/online': '/网络区域社群'
 	},
 	integrations: [
