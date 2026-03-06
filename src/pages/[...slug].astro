@@ -7,6 +7,8 @@ import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
 import Map from '../components/Map.astro';
 import Search from '../components/Search.astro';
+import ShortUrl from '../components/ShortUrl.astro';
+import { titleAliases } from '../components/aliases';
 
 export async function getStaticPaths() {
 	const listEntries = await getCollection('lists');
@@ -18,11 +20,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { sections } = entry.data;
+const alias = titleAliases[entry.data.title];
 ---
 
 <BaseLayout frontmatter={entry.data} headings={sections}>
 	<section id="title-section">
 		<H1 id="_top">{entry.data.title}</H1>
+		{alias && <ShortUrl {alias} />}
 		<Map {sections} />
 	</section>
 	<Search title={entry.data.title} />

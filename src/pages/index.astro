@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Banner from '../components/Banner.astro';
 import H1 from '../components/H1.astro';
 import UL from '../components/UL.astro';
+import { titleAliases } from '../components/aliases';
 
 export const listEntries = (await getCollection('lists')).sort((a, b) => a.data.id - b.data.id);
 ---
@@ -36,7 +37,7 @@ export const listEntries = (await getCollection('lists')).sort((a, b) => a.data.
 	<div class="mt-4 max-w-xl space-y-4">
 		{
 			listEntries.map((entry) => (
-				<Banner slug={entry.data.title} count={entry.data.count}>
+				<Banner slug={entry.data.title} count={entry.data.count} alias={titleAliases[entry.data.title]}>
 					{entry.data.title}
 				</Banner>
 			))

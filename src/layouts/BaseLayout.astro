@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar.astro';
 import type { CollectionEntry } from 'astro:content';
 
 export type Props = {
+	slug?: string;
 	headings?: MarkdownHeading[];
 	frontmatter?: CollectionEntry<'lists'>['data'];
 };

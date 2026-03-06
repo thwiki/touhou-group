@@ -2,15 +2,24 @@
 export type Props = {
 	slug: string;
 	count: number;
+	alias?: string;
 };
 
-const { slug, count } = Astro.props;
+const { slug, count, alias } = Astro.props;
+const host = Astro.site?.host ?? 'touhou.group';
 ---
 
 <a
 	class="flex flex-wrap items-center gap-4 rounded-lg border border-gray-200 p-4 text-3xl font-medium text-gray-800 shadow-sm outline-none ring-amber-500 transition-colors hover:bg-gray-100 focus:ring-2 active:bg-gray-200"
 	href={`/${slug}/`}
 >
-	<div><slot /></div>
-	<div class="ml-auto">{count} 个</div>
+	<div>
+		<slot />
+		{alias && (
+			<span class="block font-mono text-xs font-normal text-gray-400 mt-0.5">
+				{host}/{alias}
+			</span>
+		)}
+	</div>
+	<div class="ml-auto shrink-0">{count} 个</div>
 </a>

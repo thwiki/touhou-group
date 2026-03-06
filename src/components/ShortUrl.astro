@@ -1,0 +1,59 @@
+---
+export type Props = {
+	alias: string;
+};
+
+const { alias } = Astro.props;
+const host = Astro.site?.host ?? 'touhou.group';
+const shortUrl = `${host}/${alias}`;
+const fullUrl = `https://${host}/${alias}`;
+---
+
+<div class="-mt-2 mb-5 flex items-center gap-2 text-sm text-gray-400">
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 20 20"
+		fill="currentColor"
+		class="size-4 shrink-0"
+		aria-hidden="true"
+	>
+		<path
+			d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z"
+		></path>
+		<path
+			d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 0 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z"
+		></path>
+	</svg>
+	<a
+		href={fullUrl}
+		class="font-mono text-gray-400 transition-colors hover:text-amber-600"
+		title="短链接"
+	>
+		{shortUrl}
+	</a>
+	<button
+		data-copy-url={fullUrl}
+		class="short-url-copy rounded border border-gray-200 px-2 py-0.5 text-xs transition-colors hover:border-amber-400 hover:text-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-400"
+		aria-label="复制短链接"
+	>
+		复制
+	</button>
+</div>
+
+<script>
+	document.querySelectorAll<HTMLButtonElement>('.short-url-copy').forEach((btn) => {
+		btn.addEventListener('click', async () => {
+			const url = btn.dataset.copyUrl!;
+			try {
+				await navigator.clipboard.writeText(url);
+				const orig = btn.textContent!;
+				btn.textContent = '✓ 已复制';
+				setTimeout(() => {
+					btn.textContent = orig;
+				}, 2000);
+			} catch {
+				// clipboard API 不可用时静默失败
+			}
+		});
+	});
+</script>
