@@ -51,25 +51,68 @@ const { title = '东方相关 QQ 群组列表' } = Astro.props;
 
 <script>
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const groupCards = document.querySelectorAll<HTMLElement>('.grid-areas-card[id^="group-"]');
   const noResults = document.getElementById('no-results') as HTMLElement;
-  
-  // 从 URL 获取搜索参数
-  function getSearchParam() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('q') || '';
+  const sections = document.querySelectorAll<HTMLElement>('section');
+
+  // 用 DOM API 渲染高亮，完全避免 innerHTML / XSS 风险
+  function applyHighlight(element: HTMLElement, text: string, query: string) {
+    element.replaceChildren();
+    if (!query) {
+      element.appendChild(document.createTextNode(text));
+      return;
+    }
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'gi');
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        element.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+      }
+      const mark = document.createElement('mark');
+      mark.className = 'bg-amber-200';
+      mark.appendChild(document.createTextNode(match[0]));
+      element.appendChild(mark);
+      lastIndex = regex.lastIndex;
+    }
+    if (lastIndex < text.length) {
+      element.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
   }
 
-  // 清空搜索并显示所有内容
-  function clearSearch() {
-    searchInput.value = '';
-    searchInput.dispatchEvent(new Event('input'));
-  }
-  
-  // 监听搜索输入
-  searchInput.addEventListener('input', () => {
-    const searchText = searchInput.value.trim().toLowerCase();
-    
+  // 预缓存所有卡片的 DOM 引用和原始文本，避免每次搜索时重复查询和读取 DOM
+  const cardCache = Array.from(
+    document.querySelectorAll<HTMLElement>('.grid-areas-card[id^="group-"]')
+  ).map((card) => {
+    const labelElements = Array.from(card.querySelectorAll<HTMLElement>('.grid-in-labels > div'));
+    const groupIdElement = card.querySelector<HTMLElement>('.grid-in-content > div:first-child');
+    const groupNameElement = card.querySelector<HTMLElement>('.grid-in-content > div:nth-child(2)');
+    const groupMemoElement = card.querySelector<HTMLElement>('.grid-in-content > div:last-child');
+    const groupIdText = groupIdElement?.textContent?.trim() ?? '';
+    const groupNameText = groupNameElement?.textContent?.trim() ?? '';
+    const groupMemoText = groupMemoElement?.textContent?.trim() ?? '';
+    return {
+      card,
+      groupIdElement,
+      groupNameElement,
+      groupMemoElement,
+      sectionId: card.closest('section')?.id,
+      // 小写文本用于匹配
+      labels: labelElements.map(el => el.textContent?.trim().toLowerCase() ?? '').filter(Boolean),
+      groupIdLower: groupIdText.toLowerCase(),
+      groupNameLower: groupNameText.toLowerCase(),
+      groupMemoLower: groupMemoText.toLowerCase(),
+      // 原始文本用于高亮渲染和清空还原
+      groupIdText,
+      groupNameText,
+      groupMemoText,
+    };
+  });
+
+  // 复用同一个 Map，避免每次搜索都重新分配
+  const sectionVisibility = new Map<string, boolean>();
+
+  function performSearch(searchText: string) {
     // 更新 URL，但不触发页面刷新
     const url = new URL(window.location.href);
     if (searchText) {
@@ -78,119 +121,92 @@ const { title = '东方相关 QQ 群组列表' } = Astro.props;
       url.searchParams.delete('q');
     }
     window.history.replaceState({}, '', url.toString());
-    
-    // 创建一个 Map 来跟踪每个标题下是否有可见的卡片
-    const sectionVisibility = new Map<string, boolean>();
+
+    sectionVisibility.clear();
     let hasVisibleCards = false;
 
-    // 高亮文本的函数
-    function highlightText(text: string, searchText: string): string {
-      if (!searchText) return text;
-      // 转义正则特殊字符
-      const escapedSearchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(${escapedSearchText})`, 'gi');
-      return text.replace(regex, '<mark class="bg-amber-200">$1</mark>');
-    }
-    
-    groupCards.forEach(card => {
-      const cardLabels = Array.from(card.querySelectorAll<HTMLElement>('.grid-in-labels > div'))
-        .map(label => label.textContent?.trim().toLowerCase())
-        .filter((label): label is string => label !== undefined);
-      
-      // 获取群名、群号和群简介
-      const groupIdElement = card.querySelector<HTMLElement>('.grid-in-content > div:first-child');
-      const groupNameElement = card.querySelector<HTMLElement>('.grid-in-content > div:nth-child(2)');
-      const groupMemoElement = card.querySelector<HTMLElement>('.grid-in-content > div:last-child');
-      
-      const groupId = groupIdElement?.textContent?.trim().toLowerCase() || '';
-      const groupName = groupNameElement?.textContent?.trim().toLowerCase() || '';
-      const groupMemo = groupMemoElement?.textContent?.trim().toLowerCase() || '';
-      
-      // 如果搜索框为空，显示所有卡片并移除高亮
+    for (const { card, groupIdElement, groupNameElement, groupMemoElement, sectionId,
+                 labels, groupIdLower, groupNameLower, groupMemoLower,
+                 groupIdText, groupNameText, groupMemoText } of cardCache) {
       if (searchText === '') {
-        if (groupIdElement) groupIdElement.innerHTML = groupId;
-        if (groupNameElement) groupNameElement.innerHTML = groupName;
-        if (groupMemoElement) groupMemoElement.innerHTML = groupMemo;
+        if (groupIdElement) groupIdElement.textContent = groupIdText;
+        if (groupNameElement) groupNameElement.textContent = groupNameText;
+        if (groupMemoElement) groupMemoElement.textContent = groupMemoText;
         card.style.display = '';
         hasVisibleCards = true;
-        // 获取卡片所属的标题元素
-        const sectionId = card.closest('section')?.id;
-        if (sectionId) {
-          sectionVisibility.set(sectionId, true);
-        }
-        return;
+        if (sectionId) sectionVisibility.set(sectionId, true);
+        continue;
       }
-      
-      // 检查标签、群名、群号或群简介是否包含搜索文本
-      const shouldShow = cardLabels.some(label => label.includes(searchText)) ||
-        groupName.includes(searchText) ||
-        groupId.includes(searchText) ||
-        groupMemo.includes(searchText);
-      
-      // 如果卡片应该显示，添加高亮
+
+      const shouldShow =
+        labels.some(l => l.includes(searchText)) ||
+        groupNameLower.includes(searchText) ||
+        groupIdLower.includes(searchText) ||
+        groupMemoLower.includes(searchText);
+
       if (shouldShow) {
-        if (groupIdElement) groupIdElement.innerHTML = highlightText(groupIdElement.textContent || '', searchText);
-        if (groupNameElement) groupNameElement.innerHTML = highlightText(groupNameElement.textContent || '', searchText);
-        if (groupMemoElement) groupMemoElement.innerHTML = highlightText(groupMemoElement.textContent || '', searchText);
+        if (groupIdElement) applyHighlight(groupIdElement, groupIdText, searchText);
+        if (groupNameElement) applyHighlight(groupNameElement, groupNameText, searchText);
+        if (groupMemoElement) applyHighlight(groupMemoElement, groupMemoText, searchText);
         card.style.display = '';
         hasVisibleCards = true;
       } else {
         card.style.display = 'none';
       }
-      
-      // 获取卡片所属的标题元素
-      const sectionId = card.closest('section')?.id;
+
       if (sectionId) {
         sectionVisibility.set(sectionId, sectionVisibility.get(sectionId) || shouldShow);
       }
-    });
+    }
 
-    const sections = document.querySelectorAll('section');
-    // 遍历所有section，检查相邻section之间的可见性
+    // 遍历所有 section，根据可见性决定是否显示
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
-      // 一级标题和地图
       if (section.id === 'title-section') {
         section.style.display = '';
         continue;
       }
-      // 二级标题
-      if (section.firstElementChild?.tagName === 'H2') {
-        if (sectionVisibility.get(section.id)){
-          // 二级标题自带卡片
+      const isVisible = sectionVisibility.get(section.id) ?? false;
+      // 二级标题本身无卡片时，需检查紧随的三级标题是否有可见卡片
+      if (!isVisible && section.firstElementChild?.tagName === 'H2' && i < sections.length - 1) {
+        const next = sections[i + 1];
+        if (next.firstElementChild?.tagName === 'H3' && (sectionVisibility.get(next.id) ?? false)) {
           section.style.display = '';
-        } else {
-          // 二级标题仅标题，找下属三级标题有无卡片
-          if (i < sections.length-1){
-            const nextSection = sections[i+1]
-            if (nextSection.firstElementChild?.tagName === 'H3' && sectionVisibility.get(nextSection.id)) {
-              section.style.display = '';
-              continue;
-            }
-          }
+          continue;
         }
       }
-      // 三级标题
-      if (sectionVisibility.get(section.id)){
-        section.style.display = '';
-      } else {
-        section.style.display = 'none';
-      }
+      section.style.display = isVisible ? '' : 'none';
     }
 
-    // 显示或隐藏无结果提示
     if (searchText !== '' && !hasVisibleCards) {
       noResults.classList.remove('hidden');
     } else {
       noResults.classList.add('hidden');
     }
+  }
+
+  function getSearchParam() {
+    return new URLSearchParams(window.location.search).get('q') ?? '';
+  }
+
+  function clearSearch() {
+    searchInput.value = '';
+    performSearch('');
+  }
+
+  // 防抖：150ms 内连续触发只执行最后一次，避免高频输入时每次击键都重渲染
+  let debounceTimer: ReturnType<typeof setTimeout>;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      performSearch(searchInput.value.trim().toLowerCase());
+    }, 150);
   });
 
   // 监听侧边栏链接点击
   document.querySelectorAll('#sidebar a').forEach(link => {
     link.addEventListener('click', (e) => {
       const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href');
-      // 如果不是锚点链接，则清空搜索
       if (href && !href.startsWith('#')) {
         clearSearch();
       }
@@ -209,7 +225,7 @@ const { title = '东方相关 QQ 群组列表' } = Astro.props;
     const searchParam = getSearchParam();
     if (searchParam) {
       searchInput.value = searchParam;
-      searchInput.dispatchEvent(new Event('input'));
+      performSearch(searchParam);
     }
   });
 </script>
