@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    { "source": "/school", "destination": "/学校东方群/", "permanent": true },
+    { "source": "/regional", "destination": "/地区性东方群/", "permanent": true },
+    { "source": "/functional", "destination": "/功能性公开群/", "permanent": true },
+    { "source": "/events", "destination": "/活动官方群/", "permanent": true },
+    { "source": "/organizations", "destination": "/组织实体官方群/", "permanent": true },
+    { "source": "/online", "destination": "/网络区域社群/", "permanent": true }
+  ]
+}
