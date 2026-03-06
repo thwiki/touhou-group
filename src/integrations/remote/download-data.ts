@@ -45,10 +45,15 @@ export async function downloadData(
 		await writeFile(writePath, JSON.stringify(list), 'utf-8');
 	}
 
-	for (const image of images) {
-		writeFile(
-			path.join(jsonDestinationDir, image.target),
-			Buffer.from(await (await fetch(image.source)).arrayBuffer())
+	// 限制最大并发数，避免同时打开过多 TLS 连接导致握手失败
+	const CONCURRENCY = 8;
+	for (let i = 0; i < images.length; i += CONCURRENCY) {
+		await Promise.all(
+			images.slice(i, i + CONCURRENCY).map(async (image) => {
+				const response = await fetch(image.source);
+				const buffer = Buffer.from(await response.arrayBuffer());
+				await writeFile(path.join(jsonDestinationDir, image.target), buffer);
+			})
 		);
 	}
 
