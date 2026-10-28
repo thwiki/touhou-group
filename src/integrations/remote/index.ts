@@ -55,11 +55,15 @@ const createPlugin = (options?: RemoteOptions): AstroIntegration => {
 					});
 
 					logger.info(`Saving data to: "${jsonDestinationDir}"...`);
-					await downloadData(info, {
-						infoDestinationFile,
-						jsonDestinationDir,
-						imageDestinationRelDir
-					});
+					await downloadData(
+						info,
+						{
+							infoDestinationFile,
+							jsonDestinationDir,
+							imageDestinationRelDir
+						},
+						logger
+					);
 					logger.info(`Saved info to: "${infoDestinationFile}"`);
 				} catch (err) {
 					if (err instanceof ZodError) {
