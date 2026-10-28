@@ -9,6 +9,7 @@ export type RemoteOptions =
 			infoDestinationFile: string;
 			jsonDestinationDir: string;
 			imageDestinationRelDir: string;
+			imageConcurrency?: number;
 			source: {
 				revisionApi: string;
 				parseApi: string;
@@ -38,6 +39,7 @@ const createPlugin = (options?: RemoteOptions): AstroIntegration => {
 						infoDestinationFile,
 						jsonDestinationDir,
 						imageDestinationRelDir,
+						imageConcurrency,
 						source: {
 							revisionApi: sourceRevisionApi,
 							parseApi: sourceParseApi,
@@ -60,7 +62,8 @@ const createPlugin = (options?: RemoteOptions): AstroIntegration => {
 						{
 							infoDestinationFile,
 							jsonDestinationDir,
-							imageDestinationRelDir
+							imageDestinationRelDir,
+							imageConcurrency
 						},
 						logger
 					);

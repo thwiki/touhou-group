@@ -9,6 +9,13 @@ export const RemoteOptionsSchema = z
 			.string()
 			.optional()
 			.default(REMOTE_CONFIG_DEFAULTS.imageDestinationRelDir),
+		imageConcurrency: z
+			.number()
+			.int()
+			.min(1)
+			.max(32)
+			.optional()
+			.default(REMOTE_CONFIG_DEFAULTS.imageConcurrency),
 		source: z.object({
 			revisionApi: z.string().url(),
 			parseApi: z.string().url(),

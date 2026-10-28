@@ -7,6 +7,7 @@ type DownloadDataConfig = {
 	infoDestinationFile: string;
 	jsonDestinationDir: string;
 	imageDestinationRelDir: string;
+	imageConcurrency: number;
 };
 
 export type DownloadLogger = {
@@ -14,7 +15,6 @@ export type DownloadLogger = {
 	warn: (message: string) => void;
 };
 
-const CONCURRENCY = 8;
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 500;
 const RETRY_MAX_JITTER_MS = 250;
@@ -77,7 +77,7 @@ async function downloadImage(source: string, logger?: DownloadLogger): Promise<B
 
 export async function downloadData(
 	info: z.infer<typeof InfoSchema>,
-	{ infoDestinationFile, jsonDestinationDir, imageDestinationRelDir }: DownloadDataConfig,
+	{ infoDestinationFile, jsonDestinationDir, imageDestinationRelDir, imageConcurrency }: DownloadDataConfig,
 	logger?: DownloadLogger
 ) {
 	await rm(jsonDestinationDir, { recursive: true, force: true });
@@ -144,7 +144,7 @@ export async function downloadData(
 	};
 
 	await Promise.all(
-		Array.from({ length: Math.min(CONCURRENCY, downloads.length) }, () => worker())
+		Array.from({ length: Math.min(imageConcurrency, downloads.length) }, () => worker())
 	);
 
 	await writeFile(infoDestinationFile, JSON.stringify(info), 'utf-8');
