@@ -30,7 +30,7 @@ export const locations = [
 	{ id: '青海省', name: '青海', x: 4, y: 5, class: 'fill-cyan-400' },
 	{ id: '宁夏回族自治区', name: '宁夏', x: 5, y: 4, class: 'fill-cyan-400' },
 	{ id: '新疆维吾尔自治区', name: '新疆', x: 3, y: 4, class: 'fill-cyan-400' },
-	{ id: '台湾省', name: '台湾', x: 9, y: 7, class: 'fill-orange-400' },
+	{ id: '台湾省', name: '台灣', x: 9, y: 7, class: 'fill-orange-400' },
 	{ id: '香港特别行政区', name: '香港', x: 7, y: 8, class: 'fill-teal-400' },
 	{ id: '澳门特别行政区', name: '澳門', x: 6, y: 8, class: 'fill-teal-400' },
 	{ id: '东亚', name: '东亚', x: 10, y: 3, class: 'fill-zinc-400' },
@@ -38,5 +38,6 @@ export const locations = [
 	{ id: '南美洲', name: '南美洲', x: 2, y: 7, class: 'fill-zinc-400' },
 	{ id: '欧洲', name: '欧洲', x: 3, y: 2, class: 'fill-zinc-400' },
 	{ id: '东南亚', name: '东南亚', x: 6, y: 10, class: 'fill-zinc-400' },
-	{ id: '大洋洲', name: '大洋洲', x: 8, y: 10, class: 'fill-zinc-400' }
+	{ id: '大洋洲', name: '大洋洲', x: 8, y: 10, class: 'fill-zinc-400' },
+	{ id: '全球', name: '全球', x: 3, y: 1, class: 'fill-zinc-400' },
 ] as const;

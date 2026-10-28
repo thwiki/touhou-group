@@ -36,7 +36,9 @@ const alias = titleAliases[entry.data.title];
 			return (
 				<section id={section.slug} class="filter-section">
 					<Heading id={section.slug}>
-						<a href={`#${section.slug}`}>{section.text}</a>
+						<a href={`#${section.slug}`}>{section.text}{section.groups.length > 0 && (
+							<span style="color: #6b7280;font-size: 0.875rem;"> ({section.groups.length})</span>
+						)}</a>
 					</Heading>
 					<div class="stagger-list grid grid-cols-cards gap-4">
 						{section.groups.map((group) => (
